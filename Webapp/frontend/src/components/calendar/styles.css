@@ -1,0 +1,8 @@
+.fc-day-today {
+    background: #FFF6E0 !important;
+    border: none !important;
+} 
+
+input[type=text] {
+    width: 200px;
+}
