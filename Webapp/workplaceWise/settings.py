@@ -157,22 +157,27 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "False"
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 # DEVELOPMENT_MODE = True
 
-if DEVELOPMENT_MODE is True:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
-    }
-elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
-    if os.getenv("DATABASE_URL", None) is None:
-        raise Exception("DATABASE_URL environment variable not defined")
-    DATABASES = {
+if os.getenv("DATABASE_URL", None) is None:
+    raise Exception("DATABASE_URL environment variable not defined")
+DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-    }
+}
+# if DEVELOPMENT_MODE is True:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+#         }
+#     }
+# elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+#     if os.getenv("DATABASE_URL", None) is None:
+#         raise Exception("DATABASE_URL environment variable not defined")
+#     DATABASES = {
+#         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+#     }
 
 SECURE_HSTS_SECONDS = 31536000
 SECURE_SSL_REDIRECT = True
@@ -207,4 +212,4 @@ EMAIL_USE_TLS = True
 AUTH_USER_MODEL = 'accounts_app.CustomUser'
 
 # Try to fix collect static issue:
-DISABLE_COLLECTSTATIC = 1
+# DISABLE_COLLECTSTATIC = 1
