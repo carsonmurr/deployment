@@ -28,8 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = os.getenv("DEBUG", "False") == "True"
+# DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 # ALLOWED_HOSTS = ['127.0.0.1','localhost']
 ALLOWED_HOSTS = os.getenv("127.0.0.1,localhost", "workplace-wise-27kxy.ondigitalocean.app", "workplacewise.site").split(",")
 # Application definition
@@ -160,24 +160,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 # DEVELOPMENT_MODE = True
 
-if os.getenv("DATABASE_URL", None) is None:
-    raise Exception("DATABASE_URL environment variable not defined")
-DATABASES = {
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
+    }
+elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+    if os.getenv("DATABASE_URL", None) is None:
+        raise Exception("DATABASE_URL environment variable not defined")
+    DATABASES = {
         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-}
-# if DEVELOPMENT_MODE is True:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#         }
-#     }
-# elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
-#     if os.getenv("DATABASE_URL", None) is None:
-#         raise Exception("DATABASE_URL environment variable not defined")
-#     DATABASES = {
-#         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-#     }
+    }
 
 SECURE_HSTS_SECONDS = 31536000
 SECURE_SSL_REDIRECT = True
