@@ -2,7 +2,8 @@ import axios from 'axios';
 import { createMessage, returnErrors } from './messages';
 import { tokenConfig } from './auth';
 
-import { GET_TASKS, ADD_TASK, UPDATE_TASK, DELETE_TASK, UPDATE_COMPLETION } from './types';
+import { GET_TASKS, ADD_TASK, UPDATE_TASK, DELETE_TASK, UPDATE_COMPLETION, FETCH_COMPLETED_TASKS_COUNT_SUCCESS,
+    FETCH_COMPLETED_TASKS_COUNT_FAIL } from './types';
 
 // GET TASKS
 export const getTasks = () => (dispatch, getState) => {
@@ -74,4 +75,29 @@ export const updateCompletion = (taskId, completed) => (dispatch, getState) => {
       });
     })
     .catch((err) => dispatch(returnErrors(err.response.data, err.response.status)));
+};
+
+// GET COMPLETED TASKS
+export const fetchCompletedTasksCount = (timeRange) => async (dispatch, getState) => {
+    try {
+        const { token } = getState().auth; // Get the authentication token from the Redux store
+        const config = {
+            headers: {
+                Authorization: `Token ${token}`
+            },
+            params: {
+                time_range: timeRange
+            }
+        };
+        const response = await axios.get('/api/tasks/completed_tasks_count/', config);
+        dispatch({
+            type: FETCH_COMPLETED_TASKS_COUNT_SUCCESS,
+            payload: response.data.completed_tasks_count
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_COMPLETED_TASKS_COUNT_FAIL,
+            payload: error.message
+        });
+    }
 };

@@ -1,7 +1,10 @@
-import { GET_TASKS, DELETE_TASK, UPDATE_TASK, ADD_TASK, UPDATE_COMPLETION } from '../actions/types.js';
+import { GET_TASKS, DELETE_TASK, UPDATE_TASK, ADD_TASK, UPDATE_COMPLETION, FETCH_COMPLETED_TASKS_COUNT_SUCCESS,
+    FETCH_COMPLETED_TASKS_COUNT_FAIL } from '../actions/types.js';
 
 const initialState = {
 	tasks: [],
+	completedTasksCount: 0,
+    tasksCountError: null
 };
 
 export default function (state = initialState, action) {
@@ -37,6 +40,17 @@ export default function (state = initialState, action) {
 				...state,
 				tasks: state.tasks.map((task) =>
 				task.id === action.payload.id ? action.payload : task),
+			};
+		case FETCH_COMPLETED_TASKS_COUNT_SUCCESS:
+			return {
+				...state,
+				completedTasksCount: action.payload,
+				tasksCountError: null
+			};
+		case FETCH_COMPLETED_TASKS_COUNT_FAIL:
+			return {
+				...state,
+				tasksCountError: action.payload
 			};
 		default:
 			return state;

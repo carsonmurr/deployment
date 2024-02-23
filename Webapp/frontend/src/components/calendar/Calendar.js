@@ -1,8 +1,7 @@
 import React, { Component, Fragment} from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import {getEvents, addEvent, deleteEvent,
-} from '../../actions/calendarEvents';
+import {getEvents, addEvent, deleteEvent, getUsers} from '../../actions/calendarEvents';
 
 import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -20,8 +19,11 @@ export class Calendar extends Component{
 
   static propTypes = {
     events: PropTypes.array.isRequired,
+    users: PropTypes.array.isRequired,
     getEvents: PropTypes.func.isRequired,
+    getUsers: PropTypes.func.isRequired,
     addEvent: PropTypes.func.isRequired,
+    addEventToDifferentUser: PropTypes.func.isRequired,
     deleteEvent: PropTypes.func.isRequired,
   };
 
@@ -36,15 +38,13 @@ export class Calendar extends Component{
       title: "",
       start: "",
       end: "",
-      startTime: "",
-      endTime: "",
+      //startTime: "",
+      //endTime: "",
       allDay: false
     }
   };
 
-  componentDidMount() {
-    this.props.getEvents();
-  }
+  componentDidMount() {this.props.getEvents();}
 
   toggleAdd = () => {this.setState({ addModal: !this.state.addModal });};
   toggleMeeting = () => {this.setState({ meetingModal: !this.state.meetingModal });};
@@ -73,10 +73,13 @@ export class Calendar extends Component{
   };
 
   cancelEvent = () => {
-    let calendarObject= this.calendarRef.current.getApi()
-    let canceledEvent = calendarObject.getEventById(this.state.event.id);
-    canceledEvent.remove();
-    calendarObject.refetchEvents();
+    let { events } = this.props;
+    let canceledEvent = events.find((event) => (event.title === this.state.event.title));
+    
+    this.props.deleteEvent(canceledEvent.id);
+    this.calendarRef.current.getApi().getEventById(this.state.event.id).remove();
+
+    this.calendarRef.current.getApi().refetchEvents();
     this.toggleCancel();
   }
 
@@ -84,9 +87,9 @@ export class Calendar extends Component{
     this.state.event.title=document.getElementById('meeting_title').value;
     this.state.event.start=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value;
     this.state.event.end=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_end').value;
-    let calendarObject= this.calendarRef.current.getApi();
-    calendarObject.addEvent(this.state.event);
-    calendarObject.refetchEvents();
+
+    this.props.addEvent(this.state.event);
+    this.calendarRef.current.getApi().refetchEvents();
     this.toggleMeeting();
   }
 
@@ -94,9 +97,17 @@ export class Calendar extends Component{
     this.state.event.title = "["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value
     this.state.event.start = document.getElementById('deadline_date').value;
     this.state.event.allDay = true;
-    let calendarObject= this.calendarRef.current.getApi()
-    calendarObject.addEvent(this.state.event);
-    calendarObject.refetchEvents();
+
+    if(document.getElementById('deadline_parti').value != 0) {
+      let split = document.getElementById('deadline_parti').value.split(",");
+      for (const user in split) {
+        //userid = getIDFromUsername(user);
+        //this.props.addEventForDifferentUser(this.state.event, userid);
+      }
+    }
+
+    this.props.addEvent(this.state.event);
+    this.calendarRef.current.getApi().refetchEvents();
     this.toggleDeadline();
   }
 
@@ -107,7 +118,7 @@ export class Calendar extends Component{
                 ref={this.calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView={"dayGridMonth"}
-                events= {this.props}
+                events={this.props}
                 customButtons={{
                     addEventButton: {
                     text: 'Add Event',
@@ -184,7 +195,7 @@ export class Calendar extends Component{
                     <p>Description</p>
                     <input type="text" id="meeting_des"/>
                     <p>Participants</p>
-                    <input type="text" id="meeting_parti" placeholder="Emails separated by comma"/>
+                    <input type="text" id="meeting_parti" placeholder="Usernames separated by comma"/>
                     <p>Date</p>
                     <input type="date" id="meeting_date"/>
                     <p>Start time</p>
@@ -205,7 +216,7 @@ export class Calendar extends Component{
                     <p>Title:</p>
                     <input type="text" id="deadline_title"/>
                     <p>Description</p>
-                    <input type="text" id="deadline_des" placeholder="Emails separated by comma"/>
+                    <input type="text" id="deadline_des" placeholder="Usernames separated by comma"/>
                     <p>Participants</p>
                     <input type="text" id="deadline_parti"/>
                     <p>Date</p>
@@ -221,17 +232,18 @@ export class Calendar extends Component{
                 </ModalBody>
               </Modal>
             </Fragment>
-            
         );
     }
   }
 
   const mapStateToProps = (state) => ({
-    events: state.events,
+    events: state.events.events,
+    users: state.users.users,
   });
   
   export default connect(mapStateToProps, {
     getEvents,
+    getUsers,
     addEvent,
     deleteEvent,
   })(Calendar);

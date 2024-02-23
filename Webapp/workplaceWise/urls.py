@@ -21,13 +21,13 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', include ('frontend.urls')),
     path('', include('accounts_app.urls')),
-    path('calendar/', include('calendar_app.urls')),
-    path('admin/', admin.site.urls),
     path('', include('tasks_app.urls')),
-    path('performance/', include('performance_app.urls')),
-    path('', include('discussions_app.urls')),
+    path('', include('calendar_app.urls')),
+    #path('performance/', include('performance_app.urls')),
+    #path('', include('discussions_app.urls')),
 ]
 
 # only adding this to url patterns when in debug mode (for media)

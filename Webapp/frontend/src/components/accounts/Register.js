@@ -4,55 +4,53 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { register } from '../../actions/auth';
 import { createMessage } from '../../actions/messages';
-import '../styles/Account.css'; 
 
-export class Register extends Component {
-  // Initializing the component state
+class Register extends Component {
   state = {
-    first_name: '',
-    last_name: '',
-    username: '',
-    email: '',
-    password: '',
-    password2: '',
-    // employee_id: '',
+      first_name: '',
+      last_name: '',
+      email: '',
+      employee_id: '',
+      username: '',
+      password: '',
+      password2: '',
+      profile_pic: null,
   };
 
-  static propTypes = {
-    register: PropTypes.func.isRequired,
-    isAuthenticated: PropTypes.bool,
-  };
-
-   // Event handler for form submission
   onSubmit = (e) => {
-    e.preventDefault();
-    // Add employee_id to the following later
-    const { first_name, last_name, username, email, password, password2 } = this.state;
-    if (password !== password2) {
-      this.props.createMessage({ passwordNotMatch: 'Passwords do not match' });
-    } else {
-      const newUser = {
-        first_name,
-        last_name,
-        username,
-        email,
-        password,
-        // employee_id,
-      };
-      this.props.register(newUser);
-    }
+      e.preventDefault();
+      const { first_name, last_name, email, employee_id, username, password, password2, profile_pic } = this.state;
+
+      if (password !== password2) {
+          this.props.createMessage({ passwordNotMatch: 'Passwords do not match' });
+      } else {
+          const newUser = {
+              first_name,
+              last_name,
+              email,
+              employee_id,
+              username,
+              password,
+              profile_pic,
+          };
+          this.props.register(newUser);
+      }
   };
 
-  // Event handler for input field changes
-  onChange = (e) => this.setState({ [e.target.name]: e.target.value });
+  onChange = (e) => {
+      if (e.target.name === 'profile_pic') {
+          this.setState({ profile_pic: e.target.files[0] });
+      } else {
+          this.setState({ [e.target.name]: e.target.value });
+      }
+  };
 
   render() {
     // Redirecting to the home page if the user is already authenticated
     if (this.props.isAuthenticated) {
       return <Navigate to="/" />;
     }
-    // Add employee_id to the following later
-    const { first_name, last_name, username, email, password, password2 } = this.state;
+    const { first_name, last_name, email, employee_id, username, password, password2 } = this.state;
     return (
       <div className="form">
         <div className="row">
@@ -83,16 +81,6 @@ export class Register extends Component {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="username"
-                    onChange={this.onChange}
-                    value={username}
-                  />
-                </div>
-                <div className="form-group">
                   <label>Email</label>
                   <input
                     type="email"
@@ -102,6 +90,40 @@ export class Register extends Component {
                     value={email}
                   />
                 </div>
+                <div className="form-group">
+                  <label>Employee ID</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="employee_id"
+                    onChange={this.onChange}
+                    value={employee_id}
+                  />
+                </div>
+                <div className="form-group mt-2 mb-2">
+                    <div>
+                      <label>Profile Picture</label>
+                    </div>
+                    
+                    <input
+                        type="file"
+                        className="form-control-file mt-2 mb-2"
+                        name="profile_pic"
+                        onChange={this.onChange}
+                        
+                    />
+                </div>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="username"
+                    onChange={this.onChange}
+                    value={username}
+                  />
+                </div>
+
                 <div className="form-group">
                   <label>Password</label>
                   <input
@@ -129,7 +151,7 @@ export class Register extends Component {
                     Register
                   </button>
                 </div>
-                <p>
+                <p className='mt-3'>
                   Already have an account? <Link to="/login" className="small-link">Login</Link>
                 </p>
               </form>

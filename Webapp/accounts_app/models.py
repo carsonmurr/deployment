@@ -1,17 +1,63 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-class Employee(models.Model):
-    """
-    Model for the user profile
-    """
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image = models.ImageField(default='profile.png', upload_to='profile_pics')
-    # first_name = models.OneToOneField(User, on_delete=models.CASCADE)
-    # last_name = models.OneToOneField(User, on_delete=models.CASCADE)
-    # employee_id = models.CharField(max_length=20, null=True)
-    department = models.CharField(max_length=100, default="Sales")
+class UserManager(BaseUserManager):
+    def create_user(self, username, password, **extra_fields):
+        user = self.model(username=username, **extra_fields)
+        user.is_active = True
+        user.set_password(password)
+        user.save()
+        return user
 
+    def create_superuser(self, username, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+
+        if not extra_fields.get('is_staff'):
+            raise ValueError("Superuser must have is_staff = True")
+
+        if not extra_fields.get('is_superuser'):
+            raise ValueError("Superuser must have is_superuser = True")
+        return self.create_user(username, password, **extra_fields)
+
+class CustomUser(AbstractBaseUser):
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    last_name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(max_length=254, unique=True)
+    employee_id = models.CharField(max_length=10, unique=True)
+    username = models.CharField(max_length=128, unique=True)
+    password = models.CharField(max_length=128, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    # Other fields for profile
+    job_title = models.CharField(max_length=100, null=True, blank=True)
+    office_location = models.CharField(max_length=100, null=True, blank=True)
+    department = models.CharField(max_length=100, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    supervisor = models.CharField(max_length=100, null=True, blank=True)
+    profile_pic = models.ImageField(null=True, blank=True, upload_to="profile")
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'employee_id']
+
+    objects = UserManager()
+
+    """
+    def getIDFromUsername(self, usernameSearch):
+            user = CustomUser.objects.get(username=usernameSearch)
+            return user.id
+    """
 
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return self.username
+
+    def has_module_perms(self, app_label):
+        return True
+
+    def has_perm(self, perm, obj=None):
+        return True

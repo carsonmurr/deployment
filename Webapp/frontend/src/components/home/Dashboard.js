@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import '../styles/Settings.css';
+import UsernamesList from "../accounts/UsernamesList";
 
 class Dashboard extends Component {
   static propTypes = {
@@ -12,10 +13,13 @@ class Dashboard extends Component {
     const { isAuthenticated, user } = this.props.auth;
 
     return (
-      <div className="pt-5 pl-3 pr-3"> {/* Added additional padding */}
+      <div className="container pt-5 pl-3 pr-3">
         <h1 className="mb-4" style={{ fontSize: "2rem" }}>
           Welcome back <strong>{user.username}</strong>.
         </h1>
+        <div>
+          <UsernamesList />
+        </div>
 
         <div className="dashboard-info">
 					<p className="mb-4" style={{ fontSize: "1.2rem" }}>

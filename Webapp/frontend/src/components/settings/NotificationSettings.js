@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Switch from 'react-switch';
-
+import '../styles/Settings.css';
+import { Link } from 'react-router-dom';
 /*
 Need to add state functionality for notifications
  in backend so that the options can save to the user
 */
 
-const NotificationSettings = ({ goBack }) => {
+const NotificationSettings = () => {
     // Initial state for each notification setting
     const [allowNotifications, setAllowNotifications] = useState(true);
     const [notifyThrough, setNotifyThrough] = useState('Email');
@@ -26,7 +27,7 @@ const NotificationSettings = ({ goBack }) => {
     };
 
     return (
-        <div className="container-fluid p-4 rounded">
+        <div className="container p-4 rounded">
             <h2 className="mb-4">Notification Settings</h2>
             <div className="option-card mb-4">
                 <div className="d-flex justify-content-between align-items-center">
@@ -88,7 +89,9 @@ const NotificationSettings = ({ goBack }) => {
                 </div>
             </div>
 
-            <button onClick={goBack}>Back</button>
+            <div className='container' style={{textAlign:'center'}}>
+                <Link to="/settings">Back</Link>
+            </div>
         </div>
     );
 };

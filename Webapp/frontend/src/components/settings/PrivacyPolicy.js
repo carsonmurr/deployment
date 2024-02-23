@@ -1,8 +1,10 @@
 import React from 'react';
+import '../styles/Settings.css';
+import { Link } from 'react-router-dom';
 
-const PrivacyPolicy = ({goBack}) => {
+const PrivacyPolicy = () => {
     return (
-        <div>
+        <div className='container'>
             <h2>Privacy Policy</h2>
             <p><b>Last updated: September 28, 2023</b></p>
             <p>This privacy notice for Logic Terrors ("<b>we</b>," "<b>us</b>," or "<b>our</b>"),
@@ -25,8 +27,9 @@ const PrivacyPolicy = ({goBack}) => {
             privacy rights and choices. If you do not agree with our policies and practices, please
             do not use our Services. If you still have any questions or concerns, please contact us
             at Support@workplacewise.com.</p>
-            <h3>SUMMARY OF KEY POINTS</h3>
-            <button onClick={goBack}>Back</button>
+            <div className='container' style={{textAlign:'center'}}>
+                <Link to="/settings">Back</Link>
+            </div>
         </div>
     );
 };

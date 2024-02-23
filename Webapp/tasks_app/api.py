@@ -1,6 +1,11 @@
 from tasks_app.models import Task
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from .serializers import TaskSerializer
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from datetime import datetime, timedelta
 
 # Task Viewset
 class TaskViewSet(viewsets.ModelViewSet):
@@ -16,3 +21,20 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def completed_tasks_count(self, request):
+        time_range = request.query_params.get('time_range', 'week')
+        today = datetime.now().date()
+        if time_range == 'day':
+            start_date = today - timedelta(days=1)
+        elif time_range == 'month':
+            start_date = today - timedelta(days=30)
+        elif time_range == 'last_5_minutes':
+            start_date = datetime.now() - timedelta(minutes=5)
+        else:
+            start_date = today - timedelta(days=7)
+
+        completed_tasks_count = self.get_queryset().filter(completed=True, completed_at__gte=start_date).count()
+
+        return Response({'completed_tasks_count': completed_tasks_count}, status=status.HTTP_200_OK)

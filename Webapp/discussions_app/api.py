@@ -1,4 +1,6 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import Discussion, Message
 from .serializers import DiscussionSerializer, MessageSerializer
 
@@ -16,4 +18,3 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Message.objects.all()
-

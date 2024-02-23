@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Import action creators for handling messages and errors
-import { createMessage, returnErrors } from "./messages";
+import { createMessage, returnErrors, fetchUsernamesSuccess, fetchUsernamesFail } from "./messages";
 
 // Import action types
 import {
@@ -14,28 +14,31 @@ import {
     LOGOUT_SUCCESS,
     REGISTER_SUCCESS,
     REGISTER_FAIL,
+    UPDATE_USER_SUCCESS,
+    UPDATE_USER_FAIL,
+    PASSWORD_RESET_EMAIL_SENT,
+    PASSWORD_RESET_EMAIL_FAIL,
+    SET_NEW_PASSWORD_SUCCESS,
+    SET_NEW_PASSWORD_FAIL
 } from './types';
 
 // Helper function to configure the request headers with the authentication token
-export const tokenConfig = getState => {
+export const tokenConfig = (getState, isMultipart = false) => {
     // Get the token from the application state (Redux store)
     const token = getState().auth.token;
-
     // Default headers configuration
     const config = {
         headers: {
-            'Content-Type': 'application/json'
-        }
-    }
-
+            'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',
+        },
+    };
     // If a token exists, add it to the headers
     if (token) {
         config.headers['Authorization'] = `Token ${token}`;
     }
 
-    // Return the configured headers
     return config;
-}
+};
 
 // Action to check token and load user information
 export const loadUser = () => (dispatch, getState) => {
@@ -43,7 +46,7 @@ export const loadUser = () => (dispatch, getState) => {
     dispatch({ type: USER_LOADING });
 
     // Create a request to load the user information
-    axios.get('/api/auth/user', tokenConfig(getState))
+    axios.get('/api/user-info/', tokenConfig(getState))
         .then(res => {
             // If successful, dispatch USER_LOADED action with user data
             dispatch({
@@ -73,7 +76,7 @@ export const login = (username, password) => dispatch => {
     const body = JSON.stringify({ username, password });
 
     // Send a POST request to the login API
-    axios.post('/api/auth/login', body, config)
+    axios.post('/api/login/', body, config)
         .then((res) => {
             // If successful, dispatch LOGIN_SUCCESS action with token and user data
             dispatch({
@@ -94,7 +97,7 @@ export const login = (username, password) => dispatch => {
 // Action to log out a user
 export const logout = () => (dispatch, getState) => {
     // Send a POST request to the logout API with null as the body
-    axios.post('/api/auth/logout', null, tokenConfig(getState))
+    axios.post('/api/logout/', null, tokenConfig(getState))
         .then((res) => {
             // If successful, dispatch LOGOUT_SUCCESS action
             dispatch({
@@ -108,30 +111,31 @@ export const logout = () => (dispatch, getState) => {
 }
 
 // Action to register a new user
-export const register = ({ first_name, last_name, username, password, email, employee_id }) => dispatch => {
-    // Headers configuration for the request
+export const register = ({ first_name, last_name, email, employee_id, username, password, profile_pic }) => dispatch => {
     const config = {
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
         }
     }
 
-    // Request body with user registration data
-    const body = JSON.stringify({ first_name, last_name, username, password, email, employee_id });
+    const formData = new FormData();
+    formData.append('first_name', first_name);
+    formData.append('last_name', last_name);
+    formData.append('email', email);
+    formData.append('employee_id', employee_id);
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('profile_pic', profile_pic);
 
-    // Send a POST request to the register API
-    axios.post('/api/auth/register', body, config)
+    axios.post('/api/register/', formData, config)
         .then((res) => {
-            // If successful, dispatch REGISTER_SUCCESS action with user data
             dispatch({
                 type: REGISTER_SUCCESS,
                 payload: res.data
             });
-            // Dispatch a message to indicate successful user registration
             dispatch(createMessage({ registerUser: 'User registered successfully.' }))
         })
         .catch((err) => {
-            // If there's an error, log it, dispatch error details, and REGISTER_FAIL action
             console.log(err);
             dispatch(returnErrors(err.response.data, err.response.status));
             dispatch({
@@ -140,38 +144,88 @@ export const register = ({ first_name, last_name, username, password, email, emp
         });
 }
 
-// actions/auth.js
+// Action to update user information
+export const updateUser = (userData) => (dispatch, getState) => {
+    const { profile_pic, ...otherFields } = userData;
 
-// Action to update the user's username
-export const updateUsername = (newUsername) => (dispatch, getState) => {
-    const config = tokenConfig(getState);
-    const body = JSON.stringify({ username: newUsername });
+    const formData = new FormData();
 
-    axios.patch('/api/auth/settings', body, config)
+    // Append other fields to the formData
+    for (const key in otherFields) {
+        if (otherFields.hasOwnProperty(key)) {
+            formData.append(key, otherFields[key]);
+        }
+    }
+
+    // Append profile_pic as a file to formData
+    if (profile_pic instanceof File) {
+        formData.append('profile_pic', profile_pic, profile_pic.name);
+    }
+
+    axios
+        .patch('/api/update-user/', formData, tokenConfig(getState, true))
         .then((res) => {
             dispatch({
-                type: USER_LOADED,  // Refresh user information after update
-                payload: res.data
+                type: UPDATE_USER_SUCCESS,
+                payload: res.data,
             });
-            dispatch(createMessage({ updateUsername: 'Username updated successfully.' }));
         })
         .catch((err) => {
-            console.log(err);
             dispatch(returnErrors(err.response.data, err.response.status));
+            dispatch({
+                type: UPDATE_USER_FAIL,
+            });
         });
 };
 
-// Action to update the user's password
-export const updatePassword = (newPassword) => (dispatch, getState) => {
-    const config = tokenConfig(getState);
-    const body = JSON.stringify({ password: newPassword });
+export const fetchUsernames = () => {
+    return (dispatch, getState) => {
+      const { token } = getState().auth;
+      axios.get('/api/all-usernames', {
+        headers: {
+          'Authorization': `Token ${token}`,
+        }
+      })
+      .then(response => {
+        const usernames = response.data.usernames;
+        dispatch(fetchUsernamesSuccess(usernames));
+      })
+      .catch(error => {
+        dispatch(fetchUsernamesFail(error.message));
+      });
+    };
+  };
 
-    axios.patch('/api/auth/settings', body, config)
-        .then((res) => {
-            dispatch(createMessage({ updatePassword: 'Password updated successfully.' }));
+export const sendPasswordResetEmail = ({ email, redirect_url }) => {
+    return (dispatch) => {
+        axios.post('/api/request-reset-email/', { email, redirect_url })
+        .then((response) => {
+            dispatch({
+            type: PASSWORD_RESET_EMAIL_SENT
+            });
         })
-        .catch((err) => {
-            console.log(err);
-            dispatch(returnErrors(err.response.data, err.response.status));
+        .catch((error) => {
+            dispatch({
+            type: PASSWORD_RESET_EMAIL_FAIL,
+            error
+            });
         });
+    };
 };
+  
+  export const setNewPassword = ({ password, token, uidb64 }) => {
+    return (dispatch) => {
+      axios.patch('/api/password-reset-complete/', { password, token, uidb64 })
+        .then((response) => {
+          dispatch({
+            type: SET_NEW_PASSWORD_SUCCESS
+          });
+        })
+        .catch((error) => {
+          dispatch({
+            type: SET_NEW_PASSWORD_FAIL, 
+            error
+        });
+        });
+    };
+  };

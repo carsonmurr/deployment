@@ -3,8 +3,8 @@ import { Link, Navigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
-import '../styles/Account.css'; 
 import login_business from '../../../../media/login_business.jpg';
+import '../styles/Account.css';
 
 // See: https://mdbootstrap.com/docs/standard/extended/login/#!
 export class Login extends Component {
@@ -79,21 +79,19 @@ export class Login extends Component {
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg"
-                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
+                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', backgroundColor: '#D3D3D3', color: '#000000' }}
                   >
                     Login
                   </button>
-                  <p>
+                  <p className='mt-3'>
                     Don't have an account? <Link to="/register" className="small-link">Register</Link>
+                  </p>
+                  <p className='mt-3'>
+                    Forgot your password? <Link to="/forgot-password" className="small-link">Forgot Password</Link>
                   </p>
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-        <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-          <div className="text-white mb-3 mb-md-0">
-            WorkplaceWise © 2023. All rights reserved.
           </div>
         </div>
       </section>

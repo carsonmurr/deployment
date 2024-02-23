@@ -6,11 +6,14 @@ import auth from './auth';
 import messages from './messages';
 import tasks from './tasks';
 import discussions from './discussions';
+import events from './events';
+
 
 export default combineReducers({
 	errors,
 	auth,
 	messages,
 	tasks,
-	discussions
+	discussions,
+	events
 });

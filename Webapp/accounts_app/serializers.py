@@ -1,30 +1,40 @@
 from rest_framework import serializers
-# Django already has a user model so we can utilize it
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from .models import CustomUser
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 
-# Serializers for accounts based on this tutorial: https://youtu.be/0d7cIfiydAc?si=2KGWXphJfuk00LXL
+User = get_user_model()
 
-# Register Serializer: Creates new user account
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email', 'password') #'employee_id'
+        model = CustomUser
+        fields = '__all__'
+
+class RegisterSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.ImageField(write_only=True, required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
         extra_kwargs = {'password': {'write_only': True}}
-    
+
     def create(self, validated_data):
-        # Validates the fields and creates a new user account
-        account = User.objects.create_user(first_name=validated_data['first_name'],
-                                           last_name=validated_data['last_name'],
-                                           username=validated_data['username'], 
-                                           email=validated_data['email'], 
-                                           password=validated_data['password'])
-        # Figure out a way to add employee_ids here
-        # employee_id=validated_data['employee_id']
+        profile_pic = validated_data.pop('profile_pic', None)
 
-        return account
+        user = CustomUser.objects.create_user(**validated_data)
+        #user = CustomUser(**validated_data)
 
-# Login Serializer: Validates login credentials
+        if profile_pic:
+            user.profile_pic = profile_pic
+
+        #user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -35,24 +45,85 @@ class LoginSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Incorrect Credentials")
 
-# User Serializer: Creates basic user profile
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email')
+class UpdateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
 
-    # Updates user data, which for now just contains changing password
-    # Might need to change later
+    class Meta:
+        model = CustomUser
+        fields = ('first_name',
+                  'last_name',
+                  'email',
+                  'employee_id',
+                  'username',
+                  'password',
+                  'job_title',
+                  'office_location',
+                  'department',
+                  'phone_number',
+                  'supervisor',
+                  'profile_pic',
+                  )
+
     def update(self, instance, validated_data):
-        password = validated_data.pop("password", None)
-        for key, value in validated_data.items():
-            setattr(instance, key, value)
-        if password is not None:
+        password = validated_data.pop('password', None)
+        
+        # Update only if a new password is provided
+        if password:
             instance.set_password(password)
+
+        # Update other fields
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.employee_id = validated_data.get('employee_id', instance.employee_id)
+        instance.username = validated_data.get('username', instance.username)
+        instance.job_title = validated_data.get('job_title', instance.job_title)
+        instance.office_location = validated_data.get('office_location', instance.office_location)
+        instance.department = validated_data.get('department', instance.department)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.supervisor = validated_data.get('supervisor', instance.supervisor)
+        instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
+
         instance.save()
         return instance
+    
+# See https://www.youtube.com/watch?v=2kKwPk5qPUs&list=PLx-q4INfd95EsUuON1TIcjnFZSqUfMf7s&index=13
 
-class UserSettingsSerializer(serializers.ModelSerializer):
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    redirect_url = serializers.CharField(max_length=500, required=False)
+
     class Meta:
-        model = User
-        fields = ('id', 'first_name', 'last_name', 'username', 'email')
+        fields = ['email']
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        min_length=6, max_length=68, write_only=True)
+    token = serializers.CharField(
+        min_length=1, write_only=True)
+    uidb64 = serializers.CharField(
+        min_length=1, write_only=True)
+
+    class Meta:
+        fields = ['password', 'token', 'uidb64']
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64 = attrs.get('uidb64')
+
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise AuthenticationFailed('The reset link is invalid', 401)
+
+            user.set_password(password)
+            user.save()
+
+            return (user)
+        except Exception as e:
+            raise AuthenticationFailed('The reset link is invalid', 401)
+        return super().validate(attrs)

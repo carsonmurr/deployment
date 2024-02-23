@@ -1,14 +1,19 @@
-from django.urls import path, include
-from .api import UserAPI, RegisterAPI, LoginAPI, UserSettingsAPI, AllUsernamesAPI
-from knox import views as knox_views
+from django.urls import path
+from .api import UserAPI, RegisterAPI, LoginAPI, UpdateUserAPI, AllUsersAPI, AllUsernamesAPI, RequestPasswordResetEmail, PasswordTokenCheckAPI, SetNewPasswordAPIView
+from knox.views import LogoutView
+from django.contrib.auth import views as auth_views
+from rest_framework import routers
+from .api import AllUsersAPI
 
 urlpatterns = [
-    path('api/auth', include('knox.urls')),
-    path('api/auth/user', UserAPI.as_view()),
-    path('api/auth/register', RegisterAPI.as_view()),
-    path('api/auth/login', LoginAPI.as_view()),
-    path('api/auth/settings', UserSettingsAPI.as_view(), name='user_settings'),
-    # Invalidates token, forces user to login again to get a new token
-    path('api/auth/logout', knox_views.LogoutView.as_view(), name='knox_logout'),
-    path('api/auth/all_usernames', AllUsernamesAPI.as_view(), name='all_usernames'),
+    path('api/user-info/', UserAPI.as_view(), name='user_info'),
+    path('api/register/', RegisterAPI.as_view(), name='register'),
+    path('api/login/', LoginAPI.as_view(), name='login'),
+    path('api/update-user/', UpdateUserAPI.as_view(), name='update_user'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
+    path('api/all-users/', AllUsersAPI.as_view(), name='all_users'),
+    path('api/all-usernames', AllUsernamesAPI.as_view(), name='all_usernames'),
+    path('api/request-reset-email/', RequestPasswordResetEmail.as_view(), name="request-reset-email"),
+    path('api/password-reset/<uidb64>/<token>/', PasswordTokenCheckAPI.as_view(), name='password-reset-confirm'),
+    path('api/password-reset-complete/', SetNewPasswordAPIView.as_view(), name='password-reset-complete')
 ]
