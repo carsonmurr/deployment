@@ -207,4 +207,4 @@ EMAIL_USE_TLS = True
 AUTH_USER_MODEL = 'accounts_app.CustomUser'
 
 # Try to fix collect static issue:
-# DISABLE_COLLECTSTATIC = 1
+DISABLE_COLLECTSTATIC = 1
