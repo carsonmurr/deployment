@@ -205,3 +205,6 @@ EMAIL_USE_TLS = True
 
 # Added custom user model in Beta Release:
 AUTH_USER_MODEL = 'accounts_app.CustomUser'
+
+# Try to fix collect static issue:
+DISABLE_COLLECTSTATIC = 1
