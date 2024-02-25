@@ -1,7 +1,9 @@
+import axios from 'axios';
 import React, { Component, Fragment} from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import {getEvents, addEvent, deleteEvent, getUsers} from '../../actions/calendarEvents';
+import {getEvents, addEvent, deleteEvent, addEventToAll} from '../../actions/calendarEvents';
+
 
 import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -18,16 +20,15 @@ export class Calendar extends Component{
   calendarRef = React.createRef()
 
   static propTypes = {
-    events: PropTypes.array.isRequired,
-    users: PropTypes.array.isRequired,
+    events: PropTypes.array.isRequired,    
     getEvents: PropTypes.func.isRequired,
-    getUsers: PropTypes.func.isRequired,
+    addEventToAll: PropTypes.func.isRequired,
     addEvent: PropTypes.func.isRequired,
-    addEventToDifferentUser: PropTypes.func.isRequired,
     deleteEvent: PropTypes.func.isRequired,
   };
 
   state = {
+    username: "",
     desModal: false,
     cancelModal: false,
     addModal: false,
@@ -44,7 +45,9 @@ export class Calendar extends Component{
     }
   };
 
-  componentDidMount() {this.props.getEvents();}
+  componentDidMount() {
+    this.props.getEvents();
+  }
 
   toggleAdd = () => {this.setState({ addModal: !this.state.addModal });};
   toggleMeeting = () => {this.setState({ meetingModal: !this.state.meetingModal });};
@@ -88,6 +91,32 @@ export class Calendar extends Component{
     this.state.event.start=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value;
     this.state.event.end=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_end').value;
 
+    if(document.getElementById('meeting_parti').value != 0) {
+      let participants = document.getElementById('meeting_parti').value.split(",");
+      for (let i = 0; i < participants.length; i++) {
+        fetch('/api/all-users', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then(response => response.json())
+        .then(data => {
+          for (let j = 0; j < data.users.length; j++) {
+            if(data.users[j].username === participants[i]) {
+              const add = {
+                creator: data.users[j].id,
+                title: this.state.event.title,
+                start: this.state.event.start,
+                end: this.state.event.end,
+                allDay: this.state.event.allDay
+              };
+              this.props.addEventToAll(add);
+            }
+          }
+        })
+      }
+    }
+
     this.props.addEvent(this.state.event);
     this.calendarRef.current.getApi().refetchEvents();
     this.toggleMeeting();
@@ -99,10 +128,28 @@ export class Calendar extends Component{
     this.state.event.allDay = true;
 
     if(document.getElementById('deadline_parti').value != 0) {
-      let split = document.getElementById('deadline_parti').value.split(",");
-      for (const user in split) {
-        //userid = getIDFromUsername(user);
-        //this.props.addEventForDifferentUser(this.state.event, userid);
+      let participants = document.getElementById('deadline_parti').value.split(",");
+      for (let i = 0; i < participants.length; i++) {
+        fetch('/api/all-users', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then(response => response.json())
+        .then(data => {
+          for (let j = 0; j < data.users.length; j++) {
+            if(data.users[j].username === participants[i]) {
+              const add = {
+                creator: data.users[j].id,
+                title: this.state.event.title,
+                start: this.state.event.start,
+                end: this.state.event.end,
+                allDay: this.state.event.allDay
+              };
+              this.props.addEventToAll(add);
+            }
+          }
+        })
       }
     }
 
@@ -216,9 +263,9 @@ export class Calendar extends Component{
                     <p>Title:</p>
                     <input type="text" id="deadline_title"/>
                     <p>Description</p>
-                    <input type="text" id="deadline_des" placeholder="Usernames separated by comma"/>
+                    <input type="text" id="deadline_des"/>
                     <p>Participants</p>
-                    <input type="text" id="deadline_parti"/>
+                    <input type="text" id="deadline_parti" placeholder="Usernames separated by comma"/>
                     <p>Date</p>
                     <input type="date" id="deadline_date"/>
                     <p>Urgency</p>
@@ -238,12 +285,11 @@ export class Calendar extends Component{
 
   const mapStateToProps = (state) => ({
     events: state.events.events,
-    users: state.users.users,
   });
   
   export default connect(mapStateToProps, {
     getEvents,
-    getUsers,
     addEvent,
+    addEventToAll,
     deleteEvent,
   })(Calendar);

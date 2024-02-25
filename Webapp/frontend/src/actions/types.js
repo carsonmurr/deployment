@@ -38,7 +38,7 @@ export const CREATE_DISCUSSIONUSER = 'CREATE_DISCUSSIONUSER';
 export const GET_EVENTS = 'GET_EVENT';
 export const ADD_EVENT = 'ADD_EVENT';
 export const DELETE_EVENT = 'DELETE_EVENT';
-export const GET_USERS = 'GET_USERS';
+export const ADD_EVENT_TO_ALL = 'ADD_EVENT_TO_ALL'
 
 export const GET_DISCUSSIONS = 'GET_DISCUSSIONS';
 export const ADD_DISCUSSION = 'ADD_DISCUSSION';
