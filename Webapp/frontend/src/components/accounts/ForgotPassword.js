@@ -9,7 +9,7 @@ class ForgotPassword extends Component {
     super(props);
     this.state = {
       email: '',
-      redirectUrl: 'http://localhost:8000/#/reset-password',
+      redirectUrl: 'https://workplace-wise-27kxy.ondigitalocean.app/#/reset-password',
       emailSent: false
     };
   }
