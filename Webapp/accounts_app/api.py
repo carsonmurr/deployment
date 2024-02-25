@@ -83,7 +83,7 @@ class UpdateUserAPI(UpdateAPIView):
         return Response(serializer.data)
     
 class AllUsersAPI(APIView):
-    permission_classes = [()]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         users = get_user_model().objects.all().values()
