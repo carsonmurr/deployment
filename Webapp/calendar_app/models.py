@@ -6,7 +6,7 @@ User = get_user_model()
 
 # Event class: contains info for calendar events, including the participants, date, and time.
 class Event(models.Model):
-    # id = models.CharField(max_length=256)
+    #id = models.CharField(max_length=256)
     title = models.CharField(max_length=200, default="")
     start = models.CharField(max_length=200, default="")
     end = models.CharField(max_length=200, default="", blank=True)
