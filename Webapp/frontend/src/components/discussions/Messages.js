@@ -68,9 +68,8 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
                 ...discussion,
                 users: discussion.users.filter(id => id !== userId),
             };
-            updateDiscussion(updatedDiscussion).then(() => {
-                setDiscussion(updatedDiscussion);
-            });
+            updateDiscussion(updatedDiscussion)
+            setDiscussion(updatedDiscussion);
         }
     };
 
