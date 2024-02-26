@@ -78,6 +78,7 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
             <h2>Messages</h2>
             { discussion && discussion.created_by === auth.user.id && (
             <div className='col'>
+                 <label style={{ marginRight: '8px' }}>Click User to remove them from the discussion:</label>
                 {discussion && discussion.users.filter(user => user !== auth.user.id).map(userId => (
                     <button key={userId} onClick={() => handleRemoveUser(userId)}>
                         {messageUsers[userId] || 'Unknown User'}

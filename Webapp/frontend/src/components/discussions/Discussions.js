@@ -108,7 +108,7 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
           <button onClick={handleAddUser}>Add User</button>
         </div>
         <div style={{ marginBottom: '10px' }}>
-          <label style={{ marginRight: '8px' }}>Message:</label>
+          <label style={{ marginRight: '8px' }}>Discussion Title:</label>
           <input
             type="text"
             value={newDiscussionTitle}
