@@ -17,9 +17,9 @@ class Dashboard extends Component {
         <h1 className="mb-4" style={{ fontSize: "2rem" }}>
           Welcome back <strong>{user.username}</strong>.
         </h1>
-        <div>
+        {/* <div>
           <UsernamesList />
-        </div>
+        </div> */}
 
         <div className="dashboard-info">
 					<p className="mb-4" style={{ fontSize: "1.2rem" }}>
