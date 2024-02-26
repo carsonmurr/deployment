@@ -2,7 +2,7 @@ import axios from 'axios';
 import { createMessage, returnErrors } from './messages';
 import { tokenConfig } from './auth';
 
-import { GET_DISCUSSIONS, ADD_DISCUSSION, GET_MESSAGES, ADD_MESSAGE, } from './types';
+import { GET_DISCUSSIONS, ADD_DISCUSSION, GET_MESSAGES, ADD_MESSAGE, UPDATE_DISCUSSION } from './types';
 
 export const getDiscussions = () => (dispatch, getState) => {
     axios
@@ -14,6 +14,15 @@ export const getDiscussions = () => (dispatch, getState) => {
             });
         })
         .catch((err) => dispatch(returnErrors(err.response.data, err.response.status)));
+};
+
+export const updateDiscussion = (updatedDiscussion) => (dispatch, getState) => {
+    axios
+        .put(`/api/discussions/${updatedDiscussion.id}/`, updatedDiscussion, tokenConfig(getState))
+        .catch((err) => {
+            console.error('Update Discussion Error:', err);
+            dispatch(returnErrors(err.response.data, err.response.status));
+        });
 };
 
 export const addDiscussion = (discussion) => (dispatch, getState) => {
@@ -34,7 +43,7 @@ export const addDiscussion = (discussion) => (dispatch, getState) => {
 
 export const getMessages = (discussionId) => (dispatch, getState) => {
     axios
-        .get(`/api/messages/?discussion=${discussionId}`, tokenConfig(getState))
+        .get(`/api/messages/?discussion=${discussionId}/`, tokenConfig(getState))
         .then((res) => {
             dispatch({
                 type: GET_MESSAGES,

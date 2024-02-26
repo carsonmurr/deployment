@@ -1,5 +1,5 @@
 from rest_framework import routers
-from .api import DiscussionViewSet, MessageViewSet, AllDiscussionsApi
+from .api import DiscussionViewSet, MessageViewSet
 
 router = routers.DefaultRouter()
 

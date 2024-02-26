@@ -31,6 +31,7 @@ import TasksApp from './tasks/TasksApp';
 import Dashboard from './home/Dashboard';
 import Calendar from './calendar/Calendar';
 import Discussions from './discussions/Discussions';
+import Messages from './discussions/Messages';
 import Performance from './performance/Performance';
 //import Discussion from './discussions/Discussion';
 //import DiscussionMain from './discussions/DiscussionMain';
@@ -136,6 +137,11 @@ class App extends Component{
                                     <Route exact path ="/discussions" element= {
                                         <PrivateRoute>
                                             <Discussions/>
+                                        </PrivateRoute>
+                                    }/>
+                                    <Route exact path ="/messages/:discussionId" element= {
+                                        <PrivateRoute>
+                                            <Messages/>
                                         </PrivateRoute>
                                     }/>
                                     <Route exact path ="/performance" element= {

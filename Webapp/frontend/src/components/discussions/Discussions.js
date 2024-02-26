@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { getDiscussions, addDiscussion } from '../../actions/discussions';
 
 
-const Discussions = ({ auth }) => {
+const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
 
-  // State variables for managing component state
   const [allUsernames, setAllUsernames] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState([auth.user.username]);
+  const [selectedUsers, setSelectedUsers] = useState([auth.user]);
   const [newDiscussionTitle, setNewDiscussionTitle] = useState('');
-  const [discussions, setDiscussions] = useState([]);
+  const [localdiscussions, setDiscussions] = useState([]);
   const [optionUsers, setOptionUsers] = useState([]);
 
   useEffect(() => {
-    // Effect to fetch all usernames
-    fetch('/api/all-usernames', {
+    fetch('/api/all-users/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -25,16 +24,25 @@ const Discussions = ({ auth }) => {
     })
       .then(response => response.json())
       .then(data => {
-        // Filter out the current user's username
-        const filteredUsernames = data.usernames.filter(username => username !== auth.user.username);
-        setAllUsernames(filteredUsernames);
-        setOptionUsers(filteredUsernames);
+        const filteredUsers = data.users.filter(user => user.username !== auth.user.username);
+        setAllUsernames(filteredUsers);
+        setOptionUsers(filteredUsers);
       })
-      .catch(error => console.error('Error fetching usernames:', error));
-  }, [auth.token, auth.user.username]);
+      .catch(error => console.error('Error fetching users:', error));
+  }, [auth.token, auth.user]);
+
+  useEffect(() => {
+    getDiscussions();
+  }, [getDiscussions]);
+  
+  useEffect(() => {
+    const userDiscussions = discussions.filter(discussion =>
+      discussion.users.includes(auth.user.id)
+    );
+    setDiscussions(userDiscussions);
+  }, [discussions, auth.user.id]);
   
   
-  // Event handlers for form input changes
   const handleUserChange = (e) => {
     const { value } = e.target;
     setSelectedUser(value);
@@ -42,38 +50,40 @@ const Discussions = ({ auth }) => {
 
   const handleAddUser = () => {
     if (selectedUser) {
-      setSelectedUsers([...selectedUsers, selectedUser]);
-      setOptionUsers(optionUsers.filter(user => user !== selectedUser));
-      setSelectedUser('');
+      const userToAdd = optionUsers.find(user => user.username === selectedUser);
+      if (userToAdd) {
+        setSelectedUsers([...selectedUsers, userToAdd]);
+        setOptionUsers(optionUsers.filter(user => user.username !== selectedUser));
+        setSelectedUser('');
+      }
     }
   };
+  
 
-  const handleRemoveUser = (username) => {
-    setSelectedUsers(selectedUsers.filter(user => user !== username));
-    setOptionUsers([...optionUsers, username]);
+  const handleRemoveUser = (userToRemove) => {
+    setSelectedUsers(selectedUsers.filter(user => user.username !== userToRemove.username));
+    setOptionUsers([...optionUsers, userToRemove]);
   };
+  
 
   const handleTitleChange = (e) => {
     setNewDiscussionTitle(e.target.value);
   };
 
-  // Event handler for creating a new discussion
   const handleCreateDiscussion = () => {
     if (selectedUsers.length > 0 && newDiscussionTitle) {
-      // Create a new discussion object
+      const userIds = selectedUsers.map(user => user.id);
       const newDiscussion = {
-        id: discussions.length + 1,
         title: newDiscussionTitle,
-        users: selectedUsers,
+        users: userIds,
+        created_by: auth.user.id,
       };
-
-      // Update discussions state
-      setDiscussions([...discussions, newDiscussion]);
-
-      // Clear form fields
-      setSelectedUsers([auth.user.username]);
+  
+      setDiscussions([...localdiscussions, newDiscussion]);
+      setSelectedUsers([auth.user]);
       setNewDiscussionTitle('');
       setOptionUsers(allUsernames);
+      addDiscussion(newDiscussion);
     }
   };
 
@@ -89,9 +99,9 @@ const Discussions = ({ auth }) => {
             <option value="" disabled>
               Select User
             </option>
-            {optionUsers.map((username) => (
-              <option key={username} value={username}>
-                {username}
+            {optionUsers.map((user) => (
+              <option key={user.id} value={user.username}>
+                {user.username}
               </option>
             ))}
           </select>
@@ -110,36 +120,44 @@ const Discussions = ({ auth }) => {
 
       <h2>Selected Users</h2>
       <div>
-        {selectedUsers.filter(username => username !== auth.user.username).map((username) => (
-          <button key={username} onClick={() => handleRemoveUser(username)}>
-            {username}
+        {selectedUsers.filter(user => user.username !== auth.user.username).map((user) => (
+          <button key={user.id} onClick={() => handleRemoveUser(user)}>
+            {user.username}
           </button>
         ))}
       </div>
 
       <h2>All Discussions</h2>
       <ul>
-        {discussions.map((discussion) => (
+        {localdiscussions.map((discussion) => (
           <li key={discussion.id}>
-            <strong>{`Discussion: ${discussion.title}`}</strong>
-            <br />
-            To: {discussion.users.join(', ')}
+            <Link to={`/messages/${discussion.id}`}>
+              <strong>{`Discussion: ${discussion.title}`}</strong>
+              <br/><br/>
+              To: {discussion.users.map(userId => allUsernames.find(user => user.id === userId)?.username || 'You').join(', ')}
+            </Link>
+            <br/><br/><br/><br/>
           </li>
         ))}
       </ul>
+
     </div>
   );
 };
 
-// PropTypes for prop validation
 Discussions.propTypes = {
   auth: PropTypes.object.isRequired,
+  discussions: PropTypes.array.isRequired,
+  getDiscussions: PropTypes.func.isRequired,
+  addDiscussion: PropTypes.func.isRequired,
 };
 
-// Map state to props for connecting to Redux store
 const mapStateToProps = (state) => ({
   auth: state.auth,
+  discussions: state.discussions.discussions,
 });
 
-// Connect the component to the Redux store
-export default connect(mapStateToProps)(Discussions);
+export default connect(mapStateToProps, {
+  getDiscussions,
+  addDiscussion,
+})(Discussions);

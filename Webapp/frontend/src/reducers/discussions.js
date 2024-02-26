@@ -1,4 +1,4 @@
-import { GET_DISCUSSIONS, ADD_DISCUSSION, GET_MESSAGES, ADD_MESSAGE } from '../actions/types';
+import { GET_DISCUSSIONS, ADD_DISCUSSION, GET_MESSAGES, ADD_MESSAGE, UPDATE_DISCUSSION } from '../actions/types';
 
 const initialState = {
     discussions: [],
@@ -34,6 +34,13 @@ export default function (state = initialState, action) {
                     ...state.activeDiscussion,
                     messages: [...state.activeDiscussion.messages, action.payload],
                 },
+            };
+        case UPDATE_DISCUSSION:
+            return{
+                ...state,
+                discussions: state.discussions.map(discussion =>
+                    discussion.id === action.payload.id ? action.payload : discussion
+                ),
             };
         default:
             return state;
