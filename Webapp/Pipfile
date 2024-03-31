@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+certifi = "==2023.11.17"
+distlib = "==0.3.7"
+filelock = "==3.12.4"
+pipenv = "==2023.11.15"
+platformdirs = "==3.10.0"
+virtualenv = "==20.24.5"
+virtualenvwrapper-win = "==1.2.7"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
