@@ -1,5 +1,5 @@
-node_modules
-package-lock.json
+# node_modules
+# package-lock.json
 frontend/static/frontend
 # Created by https://www.toptal.com/developers/gitignore/api/django,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,react
@@ -180,7 +180,7 @@ logs
 **/*.backup.*
 **/*.back.*
 
-node_modules
+# node_modules
 bower_components
 
 *.sublime*
