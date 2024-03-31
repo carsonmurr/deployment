@@ -22,8 +22,6 @@
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
-        "@emotion/react": "^11.11.4",
-        "@emotion/styled": "^11.11.0",
         "@fullcalendar/core": "^6.1.9",
         "@fullcalendar/daygrid": "^6.1.9",
         "@fullcalendar/interaction": "^6.1.9",
