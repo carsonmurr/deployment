@@ -32,9 +32,35 @@ class TaskViewSet(viewsets.ModelViewSet):
             start_date = today - timedelta(days=30)
         elif time_range == 'last_5_minutes':
             start_date = datetime.now() - timedelta(minutes=5)
+        elif time_range == 'all_time':
+            start_date = None
         else:
             start_date = today - timedelta(days=7)
 
-        completed_tasks_count = self.get_queryset().filter(completed=True, completed_at__gte=start_date).count()
-
+        if start_date is None:
+            completed_tasks_count = self.get_queryset().filter(completed=True).count()
+        else:
+            completed_tasks_count = self.get_queryset().filter(completed=True, completed_at__gte=start_date).count()
+        
         return Response({'completed_tasks_count': completed_tasks_count}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get'])
+    def unfinished_tasks_count(self, request):
+        time_range = request.query_params.get('time_range', 'week')
+        today = datetime.now().date()
+        if time_range == 'day':
+            start_date = today - timedelta(days=1)
+        elif time_range == 'month':
+            start_date = today - timedelta(days=30)
+        elif time_range == 'last_5_minutes':
+            start_date = datetime.now() - timedelta(minutes=5)
+        elif time_range == 'all_time':
+            start_date = None
+        else:
+            start_date = today - timedelta(days=7)
+
+        if start_date is None:
+            unfinished_tasks_count = self.get_queryset().filter(completed=False).count()
+        else:
+            unfinished_tasks_count = self.get_queryset().filter(completed=False, completed_at__gte=start_date).count()
+        
+        return Response({'unfinished_tasks_count': unfinished_tasks_count}, status=status.HTTP_200_OK)

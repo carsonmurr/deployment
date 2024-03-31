@@ -48,7 +48,7 @@ import CompletedTasks from './tasks/CompletedTasks';
 
 // Alert options
 const alertOptions = {
-    timeout: 2000,
+    timeout: 5000,
     position: positions.TOP_CENTER,
 };
 
@@ -159,24 +159,6 @@ class App extends Component{
                                             <Attendance/>
                                         </PrivateRoute>
                                     }/>
-                                    {/*
-                                    <Route exact path ="/discussion" element= {
-                                        <PrivateRoute>
-                                           <DiscussionMain/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/newDiscussion" element= {
-                                        <PrivateRoute>
-                                            <NewDiscussion/>
-                                        </PrivateRoute>
-                                    }/>
-
-                                    <Route exact path ="/message" element= {
-                                        <PrivateRoute>
-                                            <Discussion/>
-                                        </PrivateRoute>
-                                    }/>
-                                    */}
                                 </Routes>
                         </Fragment>
                     </Router>

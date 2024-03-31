@@ -19,7 +19,9 @@ import {
     PASSWORD_RESET_EMAIL_SENT,
     PASSWORD_RESET_EMAIL_FAIL,
     SET_NEW_PASSWORD_SUCCESS,
-    SET_NEW_PASSWORD_FAIL
+    SET_NEW_PASSWORD_FAIL,
+    EMAIL_NOTIFICATION_SENT,
+    EMAIL_NOTIFICATION_FAIL
 } from './types';
 
 // Helper function to configure the request headers with the authentication token
@@ -195,6 +197,40 @@ export const fetchUsernames = () => {
       });
     };
   };
+
+export const sendEventEmailNotification = ({ participant_email, title, sender }) => {
+    return (dispatch) => {
+        axios.post('api/event-email-notification', { participant_email, title, sender })
+        .then((response) => {
+            dispatch({
+            type: EMAIL_NOTIFICATION_SENT
+            });
+        })
+        .catch((error) => {
+            dispatch({
+            type: EMAIL_NOTIFICATION_FAIL,
+            error
+            });
+        });
+    };
+};
+
+export const sendMessageEmailNotification = ({ participant_email, title, number_of_discussionUsers }) => {
+    return (dispatch) => {
+        axios.post('api/message-email-notification', { participant_email, title, number_of_discussionUsers })
+        .then((response) => {
+            dispatch({
+            type: EMAIL_NOTIFICATION_SENT
+            });
+        })
+        .catch((error) => {
+            dispatch({
+            type: EMAIL_NOTIFICATION_FAIL,
+            error
+            });
+        });
+    };
+};
 
 export const sendPasswordResetEmail = ({ email, redirect_url }) => {
     return (dispatch) => {

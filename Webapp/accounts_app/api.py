@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status, generics, permissions
 from .models import CustomUser
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, UpdateUserSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, UpdateUserSerializer, MessageEmailNotificationSerializer, EventEmailNotificationSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
@@ -14,6 +14,7 @@ from .utils import Util
 from django.utils.encoding import smart_str, smart_bytes, DjangoUnicodeDecodeError
 from django.http import HttpResponsePermanentRedirect
 import os
+from django.db.models.functions import Substr
 
 from knox import views as knox_views
 from knox.models import AuthToken
@@ -88,6 +89,20 @@ class AllUsersAPI(APIView):
     def get(self, request):
         users = get_user_model().objects.all().values()
         return Response({'users': users}, status=status.HTTP_200_OK)
+    
+class CompanyUsersAPI(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        current_user = request.user
+        current_company_prefix = current_user.employee_id[:3]
+
+        # Filter users based on the prefix of their employee IDs
+        users = get_user_model().objects.annotate(
+            company_prefix=Substr('employee_id', 1, 3)
+        ).filter(company_prefix=current_company_prefix).values()
+
+        return Response({'users': users}, status=status.HTTP_200_OK)
 
 class AllUsernamesAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -101,6 +116,40 @@ class AllUsernamesAPI(APIView):
 class CustomRedirect(HttpResponsePermanentRedirect):
 
     allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
+
+class EventEmailNotification(generics.GenericAPIView):
+    serializer_class = EventEmailNotificationSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        participant_email = request.data.get('participant_email', '')
+
+        if User.objects.filter(email=participant_email).exists():
+            title = request.data.get('title', '')
+            sender = request.data.get('sender', '')
+            email_body = 'Hello, \nYou have been added to the event \"'+title+'\" as an participant. This event was created by user '+sender+'.'
+            data = {'email_body': email_body, 'to_email': participant_email,
+                    'email_subject': 'WorkPlaceWise Notification: New Event \"'+title+'\"'}
+            Util.send_email(data)
+        return Response({'Success': 'Email notification sent'}, status=status.HTTP_200_OK)
+    
+class MessageEmailNotification(generics.GenericAPIView):
+    serializer_class = MessageEmailNotificationSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        participant_email = request.data.get('participant_email', '')
+
+        if User.objects.filter(email=participant_email).exists():
+            title = request.data.get('title', '')
+            number_of_discussionUsers = request.data.get('number_of_discussionUsers', 1)
+            email_body = 'Hello, \nThere is a new message in the \"'+title+'\" Discussion that you are a part of with '+str(number_of_discussionUsers)+' other person/people.'
+            data = {'email_body': email_body, 'to_email': participant_email,
+                    'email_subject': 'WorkPlaceWise Notification: New Message in \"'+title+'\"'}
+            Util.send_email(data)
+        return Response({'Success': 'Email notification sent'}, status=status.HTTP_200_OK)
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
