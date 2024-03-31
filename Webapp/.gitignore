@@ -1,4 +1,4 @@
-node_modules
+# node_modules
 # package-lock.json
 frontend/static/frontend
 # Created by https://www.toptal.com/developers/gitignore/api/django,react
