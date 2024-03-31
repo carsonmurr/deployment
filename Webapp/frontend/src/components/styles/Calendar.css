@@ -3,6 +3,6 @@
     border: none !important;
 } 
 
-input[type=text] {
-    width: 200px;
+input, label {
+    display:block;
 }

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.validators import RegexValidator
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
@@ -21,11 +22,16 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser = True")
         return self.create_user(username, password, **extra_fields)
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser, models.Model):
+    alphanumeric_validator = RegexValidator(
+        regex=r'^[A-Z]{3}\d{3}$',
+        message='Employee ID must start with 3 uppercase letters denoting company followed by 3 digits.'
+    )
+
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(max_length=254, unique=True)
-    employee_id = models.CharField(max_length=10, unique=True)
+    employee_id = models.CharField(max_length=6, unique=True, validators=[alphanumeric_validator])
     username = models.CharField(max_length=128, unique=True)
     password = models.CharField(max_length=128, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,6 +47,13 @@ class CustomUser(AbstractBaseUser):
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     supervisor = models.CharField(max_length=100, null=True, blank=True)
     profile_pic = models.ImageField(null=True, blank=True, upload_to="profile")
+
+    #Fields for notification settings
+    allowNotifications = models.BooleanField(default=False)
+    notifyThrough = models.CharField(max_length=9, default="Messages")
+    notifyforTasks = models.BooleanField(default=False)
+    notifyforEvents = models.BooleanField(default=False)
+    notifyforMessages = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'employee_id']

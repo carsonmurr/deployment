@@ -62,6 +62,12 @@ class UpdateUserSerializer(serializers.ModelSerializer):
                   'phone_number',
                   'supervisor',
                   'profile_pic',
+                  'allowNotifications',
+                  'notifyThrough',
+                  'notifyforTasks',
+                  'notifyforEvents',
+                  'notifyforMessages'
+
                   )
 
     def update(self, instance, validated_data):
@@ -84,8 +90,16 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.supervisor = validated_data.get('supervisor', instance.supervisor)
         instance.profile_pic = validated_data.get('profile_pic', instance.profile_pic)
 
+        instance.allowNotifications = validated_data.get('allowNotifications', instance.allowNotifications)
+        instance.notifyThrough = validated_data.get('notifyThrough', instance.notifyThrough)
+        instance.notifyforTasks = validated_data.get('notifyforTasks', instance.notifyforTasks)
+        instance.notifyforEvents = validated_data.get('notifyforEvents', instance.notifyforEvents)
+        instance.notifyforMessages = validated_data.get('notifyforMessages', instance.notifyforMessages)
+
         instance.save()
+        print(validated_data)
         return instance
+
     
 # See https://www.youtube.com/watch?v=2kKwPk5qPUs&list=PLx-q4INfd95EsUuON1TIcjnFZSqUfMf7s&index=13
 
@@ -93,6 +107,24 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)
 
     redirect_url = serializers.CharField(max_length=500, required=False)
+
+    class Meta:
+        fields = ['email']
+
+class EventEmailNotificationSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    title = serializers.CharField(max_length=500, required=False)
+    sender = serializers.CharField(max_length=500, required=False)
+
+    class Meta:
+        fields = ['email']
+
+class MessageEmailNotificationSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    title = serializers.CharField(max_length=500, required=False)
+    number_of_discussionUsers = serializers.IntegerField(default=1, required=False)
 
     class Meta:
         fields = ['email']

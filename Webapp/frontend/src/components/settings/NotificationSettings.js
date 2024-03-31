@@ -1,30 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Switch from 'react-switch';
-import '../styles/Settings.css';
 import { Link } from 'react-router-dom';
-/*
-Need to add state functionality for notifications
- in backend so that the options can save to the user
-*/
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { updateUser } from '../../actions/auth';
 
-const NotificationSettings = () => {
-    // Initial state for each notification setting
-    const [allowNotifications, setAllowNotifications] = useState(true);
-    const [notifyThrough, setNotifyThrough] = useState('Email');
-    const [meetingRequests, setMeetingRequests] = useState(true);
-    const [messages, setMessages] = useState(true);
-    const [tasks, setTasks] = useState(true);
-    const [taskDeadlines, setTaskDeadlines] = useState(true);
+import '../styles/Settings.css';
+
+const NotificationSettings = ({ auth, updateUser }) => {
+    // Initialize local state with user's notification settings from Redux
+    const [allowNotifications, setAllowNotifications] = useState(auth.user.allowNotifications);
+    const [notifyThrough, setNotifyThrough] = useState(auth.user.notifyThrough);
+    const [meetingRequests, setMeetingRequests] = useState(auth.user.notifyforMessages);
+    const [messages, setMessages] = useState(auth.user.notifyforEvents);
+    const [taskDeadlines, setTaskDeadlines] = useState(auth.user.notifyforTasks);
 
     // Function to toggle the state of a notification setting
     const toggleSetting = (setter) => {
         setter((prev) => !prev);
     };
 
-    // Function to handle dropdown change
-    const handleNotifyThroughChange = (event) => {
-        setNotifyThrough(event.target.value);
+    // Function to handle changes in 'Allow Notifications' setting
+    const handleAllowNotificationsChange = () => {
+        const updatedValue = !allowNotifications; // Toggle the value
+        setAllowNotifications(updatedValue); // Update local state immediately
+        updateUser({ allowNotifications: updatedValue }); // Update backend and Redux state
     };
+
+    // Function to handle changes in 'Notify through' setting
+    const handleNotifyThroughChange = (event) => {
+        const newValue = event.target.value;
+        setNotifyThrough(newValue); // Update local state immediately
+        updateUser({ notifyThrough: newValue }); // Update backend and Redux state
+    };
+
+    // Function to handle changes in 'Meeting Requests' setting
+    const handleMeetingRequestsChange = () => {
+        toggleSetting(setMeetingRequests);
+        updateUser({ notifyforEvents: !meetingRequests });
+    };
+
+    // Function to handle changes in 'Messages' setting
+    const handleMessagesChange = () => {
+        toggleSetting(setMessages);
+        updateUser({ notifyforMessages: !messages });
+    };
+
+    // Function to handle changes in 'Task Deadlines' setting
+    const handleTaskDeadlinesChange = () => {
+        toggleSetting(setTaskDeadlines);
+        updateUser({ notifyforTasks: !taskDeadlines });
+    };
+
+    useEffect(() => {
+        // Update local state with new user data from Redux when it changes
+        setAllowNotifications(auth.user.allowNotifications);
+        setNotifyThrough(auth.user.notifyThrough);
+        setMeetingRequests(auth.user.notifyforEvents);
+        setMessages(auth.user.notifyforMessages);
+        setTaskDeadlines(auth.user.notifyforTasks);
+    }, [auth.user]); // Trigger useEffect whenever auth.user changes
 
     return (
         <div className="container p-4 rounded">
@@ -33,7 +68,7 @@ const NotificationSettings = () => {
                 <div className="d-flex justify-content-between align-items-center">
                     <h5 className="option-title">Allow Notifications</h5>
                     <Switch
-                        onChange={() => toggleSetting(setAllowNotifications)}
+                        onChange={handleAllowNotificationsChange}
                         checked={allowNotifications}
                     />
                 </div>
@@ -48,7 +83,7 @@ const NotificationSettings = () => {
                     >
                         <option value="Messages">Messages</option>
                         <option value="Email">Email</option>
-                        <option value="SMS">SMS</option>
+                       {/* <option value="SMS">SMS</option> */}
                     </select>
                 </div>
             </div>
@@ -59,7 +94,7 @@ const NotificationSettings = () => {
                 <div className="d-flex justify-content-between align-items-center">
                     <h5 className="option-title">Meeting Requests</h5>
                     <Switch
-                        onChange={() => toggleSetting(setMeetingRequests)}
+                        onChange={handleMeetingRequestsChange}
                         checked={meetingRequests}
                     />
                 </div>
@@ -68,26 +103,21 @@ const NotificationSettings = () => {
             <div className="option-card mb-4">
                 <div className="d-flex justify-content-between align-items-center">
                     <h5 className="option-title">Messages</h5>
-                    <Switch onChange={() => toggleSetting(setMessages)} checked={messages} />
+                    <Switch onChange={handleMessagesChange} checked={messages} />
                 </div>
             </div>
 
-            <div className="option-card mb-4">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="option-title">Tasks</h5>
-                    <Switch onChange={() => toggleSetting(setTasks)} checked={tasks} />
-                </div>
-            </div>
-
+            {/*
             <div className="option-card mb-4">
                 <div className="d-flex justify-content-between align-items-center">
                     <h5 className="option-title">Task Deadlines</h5>
                     <Switch
-                        onChange={() => toggleSetting(setTaskDeadlines)}
+                        onChange={handleTaskDeadlinesChange}
                         checked={taskDeadlines}
                     />
                 </div>
             </div>
+            */}
 
             <div className='container' style={{textAlign:'center'}}>
                 <Link to="/settings">Back</Link>
@@ -96,4 +126,13 @@ const NotificationSettings = () => {
     );
 };
 
-export default NotificationSettings;
+NotificationSettings.propTypes = {
+    auth: PropTypes.object.isRequired,
+    updateUser: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+    auth: state.auth,
+});
+
+export default connect(mapStateToProps, { updateUser })(NotificationSettings);

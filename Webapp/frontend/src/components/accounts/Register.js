@@ -99,6 +99,9 @@ class Register extends Component {
                     onChange={this.onChange}
                     value={employee_id}
                   />
+                  <small className="form-text text-muted">
+                      (Employee ID should start with 3 uppercase letters denoting the company followed by 3 digits. It is necessary in order for you to message others in the same company.)
+                  </small>
                 </div>
                 <div className="form-group mt-2 mb-2">
                     <div>

@@ -1,9 +1,10 @@
 import { GET_TASKS, DELETE_TASK, UPDATE_TASK, ADD_TASK, UPDATE_COMPLETION, FETCH_COMPLETED_TASKS_COUNT_SUCCESS,
-    FETCH_COMPLETED_TASKS_COUNT_FAIL } from '../actions/types.js';
+    FETCH_COMPLETED_TASKS_COUNT_FAIL, FETCH_UNFINISHED_TASKS_COUNT_SUCCESS, FETCH_UNFINISHED_TASKS_COUNT_FAIL } from '../actions/types.js';
 
 const initialState = {
 	tasks: [],
 	completedTasksCount: 0,
+	unfinishedTasksCount: 0,
     tasksCountError: null
 };
 
@@ -52,6 +53,18 @@ export default function (state = initialState, action) {
 				...state,
 				tasksCountError: action.payload
 			};
+		case FETCH_UNFINISHED_TASKS_COUNT_SUCCESS:
+			return {
+				...state,
+				unfinishedTasksCount: action.payload,
+				tasksCountError: null
+			};
+		case FETCH_UNFINISHED_TASKS_COUNT_FAIL:
+			return {
+				...state,
+				tasksCountError: action.payload
+			};
+			
 		default:
 			return state;
 	}

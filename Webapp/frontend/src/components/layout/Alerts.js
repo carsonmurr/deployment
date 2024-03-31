@@ -15,11 +15,14 @@ export class Alerts extends Component {
   componentDidUpdate(prevProps) {
     // Destructure props for easy access
     const { error, alert, message } = this.props;
-
     // Handle changes in the error object
-    if (error !== prevProps.error) {
-      if (error.msg.username) alert.error(error.msg.username.join());
+    if (error !== prevProps.error) { // if this.props.error changed
+      if (error.msg.username) alert.error(`Username: ${error.msg.username.join()}`);
+      if (error.msg.email) alert.error(`Email: ${error.msg.email.join()}`);
+      if (error.msg.employee_id) alert.error(`Employee ID: ${error.msg.employee_id.join()}`);
+      if (error.msg.profile_pic) alert.error(`Profile Picture: ${error.msg.profile_pic.join()}`);
       if (error.msg.non_field_errors) alert.error(error.msg.non_field_errors.join());
+      
     }
 
     if (message !== prevProps.message) {

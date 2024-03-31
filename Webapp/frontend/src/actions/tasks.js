@@ -3,7 +3,7 @@ import { createMessage, returnErrors } from './messages';
 import { tokenConfig } from './auth';
 
 import { GET_TASKS, ADD_TASK, UPDATE_TASK, DELETE_TASK, UPDATE_COMPLETION, FETCH_COMPLETED_TASKS_COUNT_SUCCESS,
-    FETCH_COMPLETED_TASKS_COUNT_FAIL } from './types';
+    FETCH_COMPLETED_TASKS_COUNT_FAIL, FETCH_UNFINISHED_TASKS_COUNT_SUCCESS, FETCH_UNFINISHED_TASKS_COUNT_FAIL } from './types';
 
 // GET TASKS
 export const getTasks = () => (dispatch, getState) => {
@@ -97,6 +97,30 @@ export const fetchCompletedTasksCount = (timeRange) => async (dispatch, getState
     } catch (error) {
         dispatch({
             type: FETCH_COMPLETED_TASKS_COUNT_FAIL,
+            payload: error.message
+        });
+    }
+};
+
+export const fetchUnfinishedTasksCount = (timeRange) => async (dispatch, getState) => {
+    try {
+        const { token } = getState().auth;
+        const config = {
+            headers: {
+                Authorization: `Token ${token}`
+            },
+            params: {
+                time_range: timeRange
+            }
+        };
+        const response = await axios.get('/api/tasks/unfinished_tasks_count/', config);
+        dispatch({
+            type: FETCH_UNFINISHED_TASKS_COUNT_SUCCESS,
+            payload: response.data.unfinished_tasks_count
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_UNFINISHED_TASKS_COUNT_FAIL,
             payload: error.message
         });
     }

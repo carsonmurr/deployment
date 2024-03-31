@@ -3,14 +3,17 @@ import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getMessages, addMessage, updateDiscussion } from '../../actions/discussions';
+import { getDiscussions, addDiscussion } from '../../actions/discussions';
+import { sendMessageEmailNotification } from '../../actions/auth';
 
-const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionMessages, discussions }) => {
+
+const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionMessages, discussions, sendMessageEmailNotification, getDiscussions, addDiscussion }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [messageUsers, setMessageUsers] = useState({});
     const { discussionId } = useParams();
     const [discussion, setDiscussion] = useState(null);
-
+    
     useEffect(() => {
         fetch('/api/all-users/', {
             method: 'GET',
@@ -59,8 +62,49 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
             addMessage(newMessageObj);
             setMessages([...messages, newMessageObj]);
             setNewMessage('');
+            let filter = discussion.users.filter((user) => user != auth.user.id)
+            for (const diss_user in filter) {
+                fetch('/api/company-users/', {
+                    method: 'GET',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Token ${auth.token}`,
+                    },
+                  }).then(response => response.json())
+                  .then(data => {
+                    let other_filter = data.users.find((user) => user.id == filter[diss_user]);
+                    if(other_filter.allowNotifications && other_filter.notifyforMessages){checkForNotifications(other_filter)};
+                  });
+            }
         }
     };
+
+    const checkForNotifications = (userIn) => {
+        if(userIn.notifyThrough === "Messages") {
+            const messageNotification = {
+                title: "System Notification: New Message in \""+discussion.title+"\"",
+                users: [...new Set([userIn.id, auth.user.id])], created_by: auth.user.id,
+              };
+              addDiscussion(messageNotification).then(() => {getDiscussions();});
+              getMessages();
+              getDiscussions();
+              fetch('/api/discussions/', {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Token ${auth.token}`,
+                },
+              }).then(response => response.json())
+              .then(data => {
+                let filter = data.find((diss) => diss.title ===  "System Notification: New Message in \""+discussion.title+"\"");
+                const message = {discussion: filter.id, sender: auth.user.id,
+                  content: "Hello, \nThere is a new message in the \""+discussion.title+"\" Discussion that you are a part of with "+discussion.users.length-1+" other person/people.",
+                };
+                addMessage(message);
+              });
+        }
+        if(userIn.notifyThrough === "Email") {sendMessageEmailNotification({ participant_email: userIn.email, title: discussion.title, number_of_discussionUsers: discussion.users.length-1});}
+      }
 
     const handleRemoveUser = (userId) => {
         if (discussion && discussion.created_by === auth.user.id) { 
@@ -74,7 +118,7 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
     };
 
     return (
-        <div>
+        <div style={{paddingBottom:'60px'}}>
             <h2>Messages</h2>
             { discussion && discussion.created_by === auth.user.id && (
             <div className='col'>
@@ -91,11 +135,11 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
                     <li key={message.id}>
                         <strong>{`${message.content}`}</strong>
                         <br />
-                        From: {messageUsers[message.sender] || 'Unknown User'}
+                        From: {messageUsers[message.sender] || 'Unknown User'} Sent: {new Date(message.timestamp).toLocaleDateString('en-us', {year:'numeric',month:'long',day:'numeric'})}
                     </li>
                 ))}
             </ul>
-            <div className="input-group mb-3">
+            <div className="input-group mb-3" style={{position:'fixed', left:'0', right:'0', bottom:'0', padding:'10px'}}>
                 <input
                     type="text"
                     className="form-control"
@@ -125,6 +169,9 @@ Messages.propTypes = {
     getMessages: PropTypes.func.isRequired,
     addMessage: PropTypes.func.isRequired,
     updateDiscussion: PropTypes.func.isRequired,
+    sendMessageEmailNotification: PropTypes.func.isRequired,
+    addDiscussion: PropTypes.func.isRequired,
+    getDiscussions: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -137,4 +184,8 @@ export default connect(mapStateToProps, {
     getMessages,
     addMessage,
     updateDiscussion,
+    sendMessageEmailNotification,
+    getDiscussions,
+    addDiscussion,
+    getDiscussions,
 })(Messages);

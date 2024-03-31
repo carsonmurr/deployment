@@ -26,19 +26,23 @@ export const updateDiscussion = (updatedDiscussion) => (dispatch, getState) => {
 };
 
 export const addDiscussion = (discussion) => (dispatch, getState) => {
-    axios
-        .post('/api/discussions/', discussion, tokenConfig(getState))
-        .then((res) => {
-            dispatch(createMessage({ addDiscussion: 'Discussion Added' }));
-            dispatch({
-                type: ADD_DISCUSSION,
-                payload: res.data,
+    return new Promise((resolve, reject) => {
+        axios
+            .post('/api/discussions/', discussion, tokenConfig(getState))
+            .then((res) => {
+                dispatch(createMessage({ addDiscussion: 'Discussion Added' }));
+                dispatch({
+                    type: ADD_DISCUSSION,
+                    payload: res.data,
+                });
+                resolve(res.data);
+            })
+            .catch((err) => {
+                console.error('Add Discussion Error:', err);
+                dispatch(returnErrors(err.response.data, err.response.status));
+                reject(err);
             });
-        })
-        .catch((err) => {
-            console.error('Add Discussion Error:', err);
-            dispatch(returnErrors(err.response.data, err.response.status));
-        });
+    });
 };
 
 export const getMessages = (discussionId) => (dispatch, getState) => {
