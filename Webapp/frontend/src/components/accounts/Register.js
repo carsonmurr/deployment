@@ -100,7 +100,9 @@ class Register extends Component {
                     value={employee_id}
                   />
                   <small className="form-text text-muted">
-                      (Employee ID should start with 3 uppercase letters denoting the company followed by 3 digits. It is necessary in order for you to message others in the same company.)
+                      (Employee ID should start with 3 uppercase letters denoting the company followed by 3 digits. It is necessary 
+                      for two or more users to have the same 3 uppercase letters in order to message eachother. An example of two employee ID's 
+                      who could message eachother are USC123 and USC101.)
                   </small>
                 </div>
                 <div className="form-group mt-2 mb-2">

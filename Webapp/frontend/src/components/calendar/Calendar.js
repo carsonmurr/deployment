@@ -15,7 +15,7 @@ import TextField from '@material-ui/core/TextField';
 
 import '../styles/Calendar.css';
 
-function StartEnd({startStr, endStr, allDay, description}) {
+function StartEnd({startStr, endStr, allDay, description, attendance}) {
   if (allDay) return <div> 
                        <p>Date: {startStr}</p> 
                        <p>Description: {description}</p> 
@@ -29,12 +29,23 @@ function StartEnd({startStr, endStr, allDay, description}) {
     let formattedEndTime = new Date(endStr).toLocaleString('en-US', {
       hour: 'numeric', minute: 'numeric', hour12: true,
     });
-    return <div> 
+    if(attendance) {
+      return <div> 
               <p>Date: {formattedDate}</p> 
               <p>Start time: {formattedStartTime}</p> 
               <p>End time: {formattedEndTime}</p> 
               <p>Description: {description}</p> 
+              <p>Attending: Yes </p>
            </div>
+    } else {
+      return <div> 
+              <p>Date: {formattedDate}</p> 
+              <p>Start time: {formattedStartTime}</p> 
+              <p>End time: {formattedEndTime}</p> 
+              <p>Description: {description}</p> 
+              <p>Attending: No </p>
+           </div>
+    }
   }
 }
 
@@ -75,6 +86,7 @@ export class Calendar extends Component {
       description: ""
     },
     description: "",
+    attended: false,
     companyUsers: null,
     participants: []
   };
@@ -157,6 +169,7 @@ export class Calendar extends Component {
   handleEventClick = ({ event }) => {
     this.setState({ event });
     this.setState({description: event.extendedProps.description});
+    this.setState({attended: event.extendedProps.attended});
     this.toggleDescription();
   };
 
@@ -271,6 +284,7 @@ export class Calendar extends Component {
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView={"dayGridMonth"}
           events={this.props}
+          eventColor={'#2c3e50'}
           customButtons={{
             addEventButton: {
               text: 'Add Event',
@@ -299,6 +313,7 @@ export class Calendar extends Component {
                 endStr = {this.state.event.endStr}
                 allDay = {this.state.event.allDay}
                 description = {this.state.description}
+                attendance={this.state.attended} 
               />
             </div>
           </ModalBody>
