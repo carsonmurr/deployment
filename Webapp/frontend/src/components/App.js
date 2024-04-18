@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import ReactDOM from 'react-dom/client';
+// import ReactDOM from 'react-dom/client';
+import {render} from "react-dom"
 import { HashRouter as Router, Route,Routes, Navigate } from 'react-router-dom';
 
 // Alerts
@@ -97,13 +98,7 @@ class App extends Component{
     }
 }
 
-ReactDOM.createRoot(
-    document.getElementById("app"),
-    )
-    .render(
-        <React.StrictMode>
-            <App />
-        </React.StrictMode>
-    );
+const root = document.getElementById("app");
+render(<App />, root);
 
 document.body.style.backgroundColor = '#FFF6E0';
