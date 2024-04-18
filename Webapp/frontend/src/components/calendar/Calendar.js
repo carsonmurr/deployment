@@ -127,7 +127,8 @@ export class Calendar extends Component {
     }).then(response => response.json())
     .then(data => {
       let newData = data.users.filter(user => user.username !== this.props.auth.user.username);
-      this.setState({ companyUsers: newData });
+      if (newData == null) this.setState({ companyUsers: 'You have no users in your organization' });
+      else this.setState({ companyUsers: newData });
       this.toggleAdd();
       this.toggleMeeting();
     });
@@ -160,7 +161,8 @@ export class Calendar extends Component {
     }).then(response => response.json())
     .then(data => {
       let newData = data.users.filter(user => user.username !== this.props.auth.user.username);
-      this.setState({ companyUsers: newData });
+      if (newData == null) this.setState({ companyUsers: 'You have no users in your organization' });
+      else this.setState({ companyUsers: newData });      
       this.toggleAdd();
       this.toggleDeadline();
     });
@@ -237,14 +239,20 @@ export class Calendar extends Component {
   }
 
   addMeeting = () => {
+    let date1 = new Date(document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value);
+    let date2 = new Date(document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_end').value);
     if(document.getElementById('meeting_title').value === "" ||
        document.getElementById('meeting_date').value === "" ||
        document.getElementById('meeting_start').value === "" ||
-       document.getElementById('meeting_end').value === "") {
+       document.getElementById('meeting_end').value === "" ||
+       document.getElementById('meeting_des').value.length > 500 ||
+       date1>date2) {
       if (document.getElementById('meeting_title').value === "") {alert('Title cannot be blank' );}
-      if (document.getElementById('meeting_date').value === "") {alert('Date cannot be blank');}
+      if (document.getElementById('meeting_date').value === "") {alert('Invalid date.');}
       if (document.getElementById('meeting_start').value === "") {alert('Start time cannot be blank');}
       if (document.getElementById('meeting_end').value === "") {alert('End time cannot be blank');}
+      if (document.getElementById('meeting_des').value.length > 500) {alert('Description cannot be longer than 500 characters. \nPlease shorten the description.');}
+      if (date1>date2) {alert('The end time of a meeting must be after the start time.');}
     } else {
       this.state.event.title=document.getElementById('meeting_title').value;
       this.state.event.start=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value;
@@ -255,28 +263,40 @@ export class Calendar extends Component {
       this.props.addEvent(this.state.event);
       this.calendarRef.current.getApi().refetchEvents();
       this.toggleMeeting();
+
+      let currentDate = new Date();
+      if(currentDate>date1) alert('FYI: You are scheduling a meeting for a date that has already passed.');
     }
   }
 
   addDeadline = () => { 
     if(document.getElementById('deadline_title').value === "" ||
-       document.getElementById('deadline_date').value === "") {
+       document.getElementById('deadline_date').value === "" ||
+       document.getElementById('deadline_des').value.length > 500) {
       if (document.getElementById('deadline_title').value === "") {alert('Title cannot be blank' );}
-      if (document.getElementById('deadline_date').value === "") {alert('Date cannot be blank');}
+      if (document.getElementById('deadline_date').value === "") {alert('Invalid date.');}
+      if (document.getElementById('deadline_des').value.length > 500) {alert('Description cannot be longer than 500 characters. \nPlease shorten the description.');}
     } else {
-    this.state.event.title = "["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value
-    this.state.event.start = document.getElementById('deadline_date').value;
-    this.state.event.allDay = true;
-    this.state.event.description=document.getElementById("deadline_des").value;
+      this.state.event.title = "["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value
+      this.state.event.start = document.getElementById('deadline_date').value;
+      this.state.event.allDay = true;
+      this.state.event.description=document.getElementById("deadline_des").value;
 
-    this.checkForParticipants();
-    this.props.addEvent(this.state.event);
-    this.calendarRef.current.getApi().refetchEvents();
-    this.toggleDeadline();
+      this.checkForParticipants();
+      this.props.addEvent(this.state.event);
+      this.calendarRef.current.getApi().refetchEvents();
+      this.toggleDeadline();
+
+      let currentDate = new Date();
+      if(currentDate>(new Date(document.getElementById('deadline_date').value))) alert('FYI: You are creating a deadline with a date that has already passed.');
     }
   }
 
   render() {
+    const { auth } = this.props;
+    if (!auth.user) {
+      return <div>Loading...</div>;
+    }
     return(
       <Fragment>
         <Fullcalendar //Establishes the Calendar
@@ -455,11 +475,11 @@ export class Calendar extends Component {
 
               <section>
                 <div style={{float: "left", marginRight:20}}>
-                  <label htmlFor="deadline_date">Start time:</label>
+                  <label htmlFor="deadline_date">Date:</label>
                   <input id="deadline_date" type="date" placeholder="HH:MM"/>
                 </div>
                 <div style={{float: "left", paddingLeft: 47}}>
-                  <label htmlFor= "urgency">End time:</label>
+                  <label htmlFor= "urgency">Urgency:</label>
                   <select style= {{display: "block"}} id="urgency" name="choice">
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>

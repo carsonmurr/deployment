@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { getMessages, addMessage, updateDiscussion } from '../../actions/discussions';
 import { getDiscussions, addDiscussion } from '../../actions/discussions';
 import { sendMessageEmailNotification } from '../../actions/auth';
 
 
-const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionMessages, discussions, sendMessageEmailNotification, getDiscussions, addDiscussion }) => {
+const Messages = ({ user, auth, getMessages, addMessage, updateDiscussion, discussionMessages, discussions, sendMessageEmailNotification, getDiscussions, addDiscussion }) => {
+    if (!user) {
+        return <div>Loading...</div>;
+      }
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [messageUsers, setMessageUsers] = useState({});
@@ -120,6 +123,10 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
     return (
         <div style={{paddingBottom:'60px'}}>
             <h2>Messages</h2>
+            <Link to='/discussions'>
+                {'◄'} Back
+            </Link>
+            <br/><br/>
             { discussion && discussion.created_by === auth.user.id && (
             <div className='col'>
                  <label style={{ marginRight: '8px' }}>Click User to remove them from the discussion:</label>
@@ -163,6 +170,7 @@ const Messages = ({ auth, getMessages, addMessage, updateDiscussion, discussionM
 };
 
 Messages.propTypes = {
+    user: PropTypes.object,
     auth: PropTypes.object.isRequired,
     discussionMessages: PropTypes.array.isRequired,
     discussions: PropTypes.array.isRequired,
@@ -175,6 +183,7 @@ Messages.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
+    user: state.auth.user,
     auth: state.auth,
     discussionMessages: state.discussions.activeDiscussion.messages,
     discussions: state.discussions.discussions

@@ -8,6 +8,7 @@ class Discussion(models.Model):
     users = models.ManyToManyField(User, related_name="discussions")
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
 
 class Message(models.Model):
     discussion = models.ForeignKey(Discussion, related_name="messages", on_delete=models.CASCADE)

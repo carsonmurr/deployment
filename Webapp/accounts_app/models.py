@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, ValidationError
+from django.utils.translation import gettext_lazy as _
+import re
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
@@ -27,13 +29,19 @@ class CustomUser(AbstractBaseUser, models.Model):
         regex=r'^[A-Z]{3}\d{3}$',
         message='Employee ID must start with 3 uppercase letters denoting company followed by 3 digits.'
     )
+    def password_validator(value):
+        if len(value) < 8:
+            raise ValidationError(_('Password must be at least 8 characters long.'))
+        if not re.search(r'\d', value) or not re.search(r'[A-Za-z]', value) or not re.search(r'[!@#$%^&*]', value):
+            raise ValidationError(_('Password must contain at least one letter, one number, and one special character.'))
+
 
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(max_length=254, unique=True)
     employee_id = models.CharField(max_length=6, unique=True, validators=[alphanumeric_validator])
     username = models.CharField(max_length=128, unique=True)
-    password = models.CharField(max_length=128, null=True)
+    password = models.CharField(max_length=128, null=True, validators=[password_validator])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)

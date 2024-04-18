@@ -9,7 +9,7 @@ class DiscussionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Discussion.objects.all()
+        return Discussion.objects.filter(active = True)
 
 
 class MessageViewSet(viewsets.ModelViewSet):

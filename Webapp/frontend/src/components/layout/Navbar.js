@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SidebarData } from './SidebarData';
 import '../styles/Navbar.css';
 import { IconContext } from 'react-icons';
@@ -16,32 +16,50 @@ import settingsIcon from '../../../../media/setting.png';
 function Navbar({ isAuthenticated, logout }) {
   const [sidebar, setSidebar] = useState(false);
   const showSidebar = () => setSidebar(!sidebar);
+  const history = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    history('/login');
+  };
 
   const authLinks = (
     <>
-        <div>
-            <Link to="/profile/" >
-              <img src={profileIcon} width={32} alt="Profile"/>
-            </Link>
-            <Link to="/settings/" >
-              <img src={settingsIcon} width={32} alt="Settings"/>
-            </Link>
-          <button onClick={logout} className="btn btn-primary" style={{ backgroundColor: '#D3D3D3', marginRight: '20px', color: '#000000' }}>
-            <div className='nav-link'> Logout </div>
-          </button>
-        </div>
+      <div> 
+        <Link to="/profile/">
+          <img src={profileIcon} width={32} alt="Profile" />
+        </Link>
+        <Link to="/settings/">
+          <img src={settingsIcon} width={32} alt="Settings" />
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="btn btn-primary"
+          style={{ backgroundColor: '#D3D3D3', marginRight: '20px', color: '#000000' }}
+        >
+          <div className='nav-link'> Logout </div>
+        </button>
+      </div>
     </>
   );
 
   const guestLinks = (
     <>
-    <div className="guest-links-container">
-      <Link to="/login" className="nav-link">
-        Login
-      </Link>
-      <Link to="/register" className="nav-link">
-        Register
-      </Link>
+      <div className="guest-links-container">
+        <Link to="/home" className="nav-link" style={{ fontSize: '18px' }}>
+          Home
+        </Link>
+        <Link to="/about" className="nav-link" style={{ fontSize: '18px' }}>
+          About
+        </Link>
+      </div>
+      <div className="guest-links-container">
+        <Link to="/login" className="nav-link" style={{ fontSize: '18px' }}>
+          Login 
+        </Link>
+        <Link to="/register" className="nav-link" style={{ fontSize: '18px' }}>
+          Register
+        </Link>
       </div>
     </>
   );
@@ -80,8 +98,10 @@ function Navbar({ isAuthenticated, logout }) {
           {SidebarData.map((item, index) => (
             <li key={index} className={item.cName}>
               <Link to={item.path}>
-                {item.icon}
-                <span>{item.title}</span>
+                <div className="icon-title-container">
+                  <div className="icon">{item.icon}</div>
+                  <span>{item.title}</span>
+                </div>
               </Link>
             </li>
           ))}

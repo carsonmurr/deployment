@@ -9,6 +9,7 @@ import { fetchCompletedTasksCount, fetchUnfinishedTasksCount } from '../../actio
 
 class Performance extends Component {
   state = {
+    loading: true,
     completedTasksCount: null,
     unfinishedTasksCount: null,
     attendedMeetingsCount: null,
@@ -33,12 +34,14 @@ class Performance extends Component {
 
   fetchData = async () => {
     try {
+      this.setState({ loading: true });
       const { timeRange } = this.state;
       await this.props.fetchCompletedTasksCount(timeRange);
       await this.props.fetchUnfinishedTasksCount(timeRange);
       await this.props.fetchAttendedMeetingsCount(timeRange);
       await this.props.fetchUnattendedMeetingsCount(timeRange);
 
+      this.setState({ loading: false });
       const { completedTasksCount, unfinishedTasksCount, attendedMeetingsCount, unattendedMeetingsCount} = this.props;
 
       // Calculate Task completion percentage
@@ -53,6 +56,7 @@ class Performance extends Component {
       this.setState({ completedTasksCount, unfinishedTasksCount, attendedMeetingsCount, unattendedMeetingsCount, taskCompletionPercentage, meetingCompletionPercentage, chartKey: Date.now() });
     } catch (error) {
       console.error("Error fetching data:", error);
+      this.setState({ loading: false });
     }
   };
 
@@ -66,6 +70,11 @@ class Performance extends Component {
 
 
   render() {
+    const { loading } = this.state;
+
+    if (loading) {
+      return <div>Loading...</div>;
+    }
 
   const { taskCompletionPercentage, meetingCompletionPercentage, attendedMeetingsCount, unattendedMeetingsCount, completedTasksCount, unfinishedTasksCount, timeRange, chartKey } = this.state;
 
@@ -88,12 +97,25 @@ class Performance extends Component {
   const cy = 200;
   const iR = 50;
   const oR = 200;
+  var value = 0;
 
-// calculating value of the speedometer
-  const temp = ((taskCompletionPercentage/ 2) + (meetingCompletionPercentage / 2));
+// // calculating value of the speedometer
+  if (completedTasksCount == 0 && unfinishedTasksCount == 0) {
+    // Case where there are no tasks but there are meetings created
+    value = 25 + meetingCompletionPercentage;
+    console.log(value);
+  } else if(attendedMeetingsCount == 0 && unattendedMeetingsCount == 0) {
+    // Case where there are no meetings but there are tasks created
+    value = 25 + taskCompletionPercentage;
+  } else if(attendedMeetingsCount == 0 && unattendedMeetingsCount == 0 && completedTasksCount == 0 && unfinishedTasksCount == 0) {
+    // Case where there are no tasks or meetings created
+    value = 0;
+  } else{
+    // Case where there are meetings and tasks
+    var temp = ((taskCompletionPercentage/ 2) + (meetingCompletionPercentage / 2));
+    value = 25 + temp;  // position of the needle
+  }
 
-  const value = 25 + temp;  // position of the needle
-  console.log(value)
   // 25 = Red
   // 75 = Yellow
   // 125 = Green
@@ -136,26 +158,8 @@ class Performance extends Component {
   } else {
     return (
       <div>
-                {/* <div style={{ textAlign: 'center' }}>
-          <label htmlFor="timeRange">Select Time Range: </label>
-          <select id="timeRange" value={timeRange} onChange={this.handleTimeRangeChange}>
-            <option value="week"> Weekly </option>
-            <option value="last_5_minutes"> Last 5 Minutes </option>
-            <option value="day"> Daily </option>
-            <option value="month"> Monthly </option>
-            <option value="all_time"> All Time</option>
-          </select>
-        </div> */}
-
-
 
                   <h1 style={{ textAlign: 'center' }} className='mb-4'>Perfomance and Statistics</h1>
-
-                  {/* <h2 style={{ textAlign: 'center' }} className='mb-4'>Overall Task Completion: {taskCompletionPercentage !== null ? taskCompletionPercentage.toFixed(2) + '%' : 'Loading...'}</h2>
-
-                  <h2 style={{ textAlign: 'center' }} className='mb-4'>Overall Meeting Attendance: {meetingCompletionPercentage !== null ? meetingCompletionPercentage.toFixed(2) + '%' : 'Loading...'}</h2>
-
-                  <h2> Time range: {timeRange}</h2> */}
 
         {/* <div> */}
         <h2>Overall Perfomance</h2>
@@ -190,10 +194,26 @@ class Performance extends Component {
 
         {/* Conditional text based on the value of the speedometer */}
 
-        {/* Messages for a Red Speedometer value */}
+          {/* Messages for a Red Speedometer value */}
+
+            {/* EDGE CASE: No Meetings made but tasks made */}
+                  {value > 0 && value <= 50 && (attendedMeetingsCount + unattendedMeetingsCount == 0) &&
+                    <h2>
+                      Based on your current task completion percentage, your performance needs improvement. Consider focusing on completing more tasks as your overall task completion percentage
+                      is: {taskCompletionPercentage.toFixed(2)}%.
+                    </h2>
+                  }
+
+            {/* EDGE CASE: No tasks made but meetings made */}
+                {value > 0 && value <= 50 && (completedTasksCount + unfinishedTasksCount == 0) &&
+                    <h2>
+                      Based on your current meeting attendance, your performance needs improvement. Consider focusing on attending more meetings as your overall meeting attendance percentage
+                      is: {meetingCompletionPercentage.toFixed(2)}%.
+                    </h2>
+                  }
 
         {/* Task Completion < Meeting Completion*/}
-        {value > 0 && value <= 50 && taskCompletionPercentage < meetingCompletionPercentage &&
+        {value > 0 && value <= 50 && taskCompletionPercentage < meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your current performance needs improvement, consider focusing on completing more tasks as your overall task completion percentage
           is: {taskCompletionPercentage.toFixed(2)}%.
@@ -202,7 +222,7 @@ class Performance extends Component {
         }
 
         {/* Task Completion > Meeting Completion*/}
-        {value > 0 && value <= 50 && taskCompletionPercentage > meetingCompletionPercentage &&
+        {value > 0 && value <= 50 && taskCompletionPercentage > meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your current performance needs improvement, consider focusing on improving your meeting attendance as your overall meeting
           attendance percentage is: {meetingCompletionPercentage.toFixed(2)}%.          
@@ -210,7 +230,7 @@ class Performance extends Component {
         </h2>
         }
         {/* Task Completion == Meeting Completion*/}
-        {value > 0 && value <= 50 && taskCompletionPercentage == meetingCompletionPercentage &&
+        {value > 0 && value <= 50 &&taskCompletionPercentage == meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your current performance needs improvement, complete more tasks and attend more meetings to improve your rating.
           {/* Your current performance needs improvement. Please review your goals and metrics to identify areas for enhancement. */}
@@ -219,9 +239,23 @@ class Performance extends Component {
 
 
         {/* Messages for a Yellow Speedometer value */}
+                {/* EDGE CASE: No Meetings made but tasks made */}
+                  {value > 50 && value <= 100 && (attendedMeetingsCount + unattendedMeetingsCount == 0) &&
+                    <h2>
+                      Based on your current task completion percentage, your performance is moderate. Consider focusing on completing more tasks as your overall task completion percentage
+                      is: {taskCompletionPercentage.toFixed(2)}%.
+                    </h2>
+                  }
 
+            {/* EDGE CASE: No tasks made but meetings made */}
+                {value > 50 && value <= 100 && (completedTasksCount + unfinishedTasksCount == 0) &&
+                    <h2>
+                      Based on your current meeting attendance, your performance is moderate. Consider focusing on attending more meetings as your overall meeting attendance percentage
+                      is: {meetingCompletionPercentage.toFixed(2)}%.
+                    </h2>
+                  }
         {/* Task Completion < Meeting Completion*/}
-        {value > 50 && value <= 100 && taskCompletionPercentage < meetingCompletionPercentage &&
+        {value > 50 && value <= 100 && taskCompletionPercentage < meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your performance is moderate. Consider focusing on improving your task completion to increase your rating as your overall 
           task completion is: {taskCompletionPercentage.toFixed(2)}%.
@@ -229,7 +263,7 @@ class Performance extends Component {
         }
 
         {/* Task Completion > Meeting Completion*/}
-        {value > 50 && value <= 100 && taskCompletionPercentage > meetingCompletionPercentage &&
+        {value > 50 && value <= 100 && taskCompletionPercentage > meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your performance is moderate. Consider focusing on improving your meeting attendance to increase your rating as your overall 
           attendance is: {meetingCompletionPercentage.toFixed(2)}%.
@@ -237,16 +271,28 @@ class Performance extends Component {
         }
         
         {/* Task Completion == Meeting Completion*/}
-        {value > 50 && value <= 100 && taskCompletionPercentage == meetingCompletionPercentage &&
+        {value > 50 && value <= 100 && taskCompletionPercentage == meetingCompletionPercentage && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
-          Your performance is moderate. To increase your rating attend more meeting and complete more tasks.
+          Your performance is moderate. To increase your rating attend more meetings and complete more tasks.
         </h2>
         }
 
 
         {/* Message for a Green Speedometer value */}
+              {/* EDGE CASE: No Meetings made but tasks made */}
+                {value > 100 && (attendedMeetingsCount + unattendedMeetingsCount == 0) &&
+                    <h2>
+                      Based on your current task completion percentage, your performance is great! Keep up the good work!
+                    </h2>
+                  }
 
-        {value > 100 &&
+            {/* EDGE CASE: No tasks made but meetings made */}
+                {value > 100 && (completedTasksCount + unfinishedTasksCount == 0) &&
+                    <h2>
+                      Based on your current meeting attendance, your performance is great! Keep up the good work!
+                    </h2>
+                  }
+        {value > 100 && (completedTasksCount + unfinishedTasksCount != 0 && attendedMeetingsCount + unattendedMeetingsCount != 0) &&
         <h2>
           Your overall performance is great! Keep up the good work!
         </h2>
@@ -258,7 +304,6 @@ class Performance extends Component {
                 <Link to="/performance/tasks">Tasks</Link>
                 <Link to="/performance/attendance">Attendance</Link>
             </div>
-      {/* </div> */}
       </div>
 
 

@@ -22,7 +22,12 @@ export class Alerts extends Component {
       if (error.msg.employee_id) alert.error(`Employee ID: ${error.msg.employee_id.join()}`);
       if (error.msg.profile_pic) alert.error(`Profile Picture: ${error.msg.profile_pic.join()}`);
       if (error.msg.non_field_errors) alert.error(error.msg.non_field_errors.join());
-      
+      if (error.msg.password) alert.error(`Password: ${error.msg.password.join()}`);
+      if (error.msg.password2) alert.error(`Confirm Password: ${error.msg.password2.join()}`);
+      if (error.msg.body) alert.error(`Task: ${error.msg.body.join()}`);
+      if (error.msg.project) alert.error(`Project: ${error.msg.project.join()}`);
+
+
     }
 
     if (message !== prevProps.message) {

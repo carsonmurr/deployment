@@ -47,22 +47,32 @@ export const loadUser = () => (dispatch, getState) => {
     // Dispatch an action indicating that user loading is in progress
     dispatch({ type: USER_LOADING });
 
-    // Create a request to load the user information
-    axios.get('/api/user-info/', tokenConfig(getState))
-        .then(res => {
-            // If successful, dispatch USER_LOADED action with user data
-            dispatch({
-                type: USER_LOADED,
-                payload: res.data
-            });
-        })
-        .catch(err => {
-            // If there's an error, dispatch error details and AUTH_ERROR action
-            dispatch(returnErrors(err.response.data, err.response.status));
-            dispatch({
-                type: AUTH_ERROR
+    // Get the token from localStorage
+    const token = localStorage.getItem('token');
+
+    if (token) {
+        // If token exists, send a request to load user information
+        axios.get('/api/user-info/', tokenConfig(getState))
+            .then(res => {
+                // If successful, dispatch USER_LOADED action with user data
+                dispatch({
+                    type: USER_LOADED,
+                    payload: res.data
+                });
             })
+            .catch(err => {
+                // If there's an error, dispatch error details and AUTH_ERROR action
+                dispatch(returnErrors(err.response.data, err.response.status));
+                dispatch({
+                    type: AUTH_ERROR
+                })
+            });
+    } else {
+        // If token doesn't exist, dispatch AUTH_ERROR action
+        dispatch({
+            type: AUTH_ERROR
         });
+    }
 }
 
 // Action to log in a user
@@ -163,10 +173,11 @@ export const updateUser = (userData) => (dispatch, getState) => {
     if (profile_pic instanceof File) {
         formData.append('profile_pic', profile_pic, profile_pic.name);
     }
-
+    console.log(formData);
     axios
         .patch('/api/update-user/', formData, tokenConfig(getState, true))
         .then((res) => {
+            // console.log(res.data);
             dispatch({
                 type: UPDATE_USER_SUCCESS,
                 payload: res.data,

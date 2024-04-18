@@ -5,12 +5,16 @@ import { Link } from 'react-router-dom';
 
 class Profile extends Component {
   static propTypes = {
-    user: PropTypes.object.isRequired,
+    user: PropTypes.object,
   };
 
+  
   render() {
     const { user } = this.props;
 
+    if (!user) {
+      return <div>Loading...</div>;
+    }
     return (
       <div className="container mt-5">
         <h2 className="mb-4">Account Details</h2>

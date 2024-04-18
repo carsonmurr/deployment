@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import '../styles/Tasks.css';
 import {
   getTasks,
   deleteTask,
@@ -140,6 +141,7 @@ class Tasks extends Component {
         </div>
 
         {/* Table for displaying tasks */}
+        <div className="table-responsive">
         <table className="table table-striped">
           <thead>
             <tr>
@@ -173,16 +175,18 @@ class Tasks extends Component {
                   )}
                 </td>
                 {/* Editable task description field */}
-                <td>
-                  {editingTaskId === task.id ? (
-                    <input
-                      type="text"
-                      value={updatedBody}
-                      onChange={(e) => this.setState({ updatedBody: e.target.value })}
-                    />
-                  ) : (
-                    task.body
-                  )}
+                <td className="task-body-cell">
+                <div className="task-body-content"> {/* Wrap task body content in a div */}
+          {editingTaskId === task.id ? (
+            <input
+              type="text"
+              value={updatedBody}
+              onChange={(e) => this.setState({ updatedBody: e.target.value })}
+            />
+          ) : (
+            task.body
+          )}
+        </div>
                 </td>
                 {/* Options (Edit, Save, Delete) */}
                 <td>
@@ -212,6 +216,7 @@ class Tasks extends Component {
             ))}
           </tbody>
         </table>
+        </div>
       </Fragment>
     );
   }

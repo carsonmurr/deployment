@@ -18,32 +18,34 @@ class Register extends Component {
   };
 
   onSubmit = (e) => {
-      e.preventDefault();
-      const { first_name, last_name, email, employee_id, username, password, password2, profile_pic } = this.state;
+    e.preventDefault();
+    const { first_name, last_name, email, employee_id, username, password, password2, profile_pic } = this.state;
 
-      if (password !== password2) {
-          this.props.createMessage({ passwordNotMatch: 'Passwords do not match' });
-      } else {
-          const newUser = {
-              first_name,
-              last_name,
-              email,
-              employee_id,
-              username,
-              password,
-              profile_pic,
-          };
-          this.props.register(newUser);
-      }
+    if (password !== password2) {
+        this.props.createMessage({ passwordNotMatch: 'Passwords do not match' });
+    } else {
+        const newUser = {
+            first_name,
+            last_name,
+            email,
+            employee_id,
+            username,
+            password,
+            profile_pic,
+        };
+        this.props.register(newUser);
+    }
   };
 
   onChange = (e) => {
-      if (e.target.name === 'profile_pic') {
-          this.setState({ profile_pic: e.target.files[0] });
-      } else {
-          this.setState({ [e.target.name]: e.target.value });
-      }
+    if (e.target.name === 'profile_pic') {
+        const file = e.target.files[0];
+        this.setState({ profile_pic: file });
+    } else {
+        this.setState({ [e.target.name]: e.target.value });
+    }
   };
+
 
   render() {
     // Redirecting to the home page if the user is already authenticated
@@ -102,7 +104,7 @@ class Register extends Component {
                   <small className="form-text text-muted">
                       (Employee ID should start with 3 uppercase letters denoting the company followed by 3 digits. It is necessary 
                       for two or more users to have the same 3 uppercase letters in order to message eachother. An example of two employee ID's 
-                      who could message eachother are USC123 and USC101.)
+                      who could message each other are USC123 and USC101.)
                   </small>
                 </div>
                 <div className="form-group mt-2 mb-2">
@@ -138,6 +140,9 @@ class Register extends Component {
                     onChange={this.onChange}
                     value={password}
                   />
+                  <small className="form-text text-muted">
+                      (Password should be at least 8 characters long and contain at least one letter, one number, and one special character (e.g. !@#$%^&*))
+                  </small>
                 </div>
                 <div className="form-group">
                   <label>Confirm Password</label>
@@ -147,6 +152,7 @@ class Register extends Component {
                     name="password2"
                     onChange={this.onChange}
                     value={password2}
+                    accept="image/jpeg, image/png"
                   />
                 </div>
                 <br />

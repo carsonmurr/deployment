@@ -6,6 +6,7 @@ import { fetchCompletedTasksCount, fetchUnfinishedTasksCount } from '../../actio
 
 class Tasks extends Component {
   state = {
+    loading: true,
     completedTasksCount: null,
     unfinishedTasksCount: null,
     completionPercentage: null,
@@ -27,6 +28,7 @@ class Tasks extends Component {
 
   fetchData = async () => {
     try {
+      this.setState({ loading: true });
       const { timeRange } = this.state;
       await this.props.fetchCompletedTasksCount(timeRange);
       await this.props.fetchUnfinishedTasksCount(timeRange);
@@ -35,9 +37,10 @@ class Tasks extends Component {
       const totalTasksCount = completedTasksCount + unfinishedTasksCount;
       const completionPercentage = totalTasksCount === 0 ? 0 : (completedTasksCount / totalTasksCount) * 100;
 
-      this.setState({ completedTasksCount, unfinishedTasksCount, completionPercentage, chartKey: Date.now() });
+      this.setState({ loading: false, completedTasksCount, unfinishedTasksCount, completionPercentage, chartKey: Date.now() });
     } catch (error) {
       console.error("Error fetching tasks data:", error);
+      this.setState({ loading: false });
     }
   };
 
@@ -53,8 +56,10 @@ class Tasks extends Component {
 // const { userLoginData, attendanceData, tasksCompletedData } = this.state;
 
 //   const {testData} = this.state;
-    const { completionPercentage, completedTasksCount, unfinishedTasksCount, timeRange, chartKey } = this.state;
-
+    const { loading, completionPercentage, completedTasksCount, unfinishedTasksCount, timeRange, chartKey } = this.state;
+    if (loading) {
+      return <div>Loading...</div>;
+    }
     // Data for Task Pie Chart
     const taskSummary = [
       { task: "Tasks Completed", value: completedTasksCount || 0 },

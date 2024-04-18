@@ -15,7 +15,7 @@ class Event(models.Model):
     allDay = models.BooleanField(max_length=200, default=False)
     creator = models.ForeignKey(User, related_name="events", on_delete=models.CASCADE, null=True)
     attended = models.BooleanField(max_length=200, default=False)
-    description =  models.CharField(max_length=200, default="", blank=True)
+    description = models.CharField(max_length=500, default="", blank=True)
     
     # For time aspect of meetings:
     created_at = models.DateTimeField(auto_now_add=True)

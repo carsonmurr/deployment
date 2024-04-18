@@ -8,15 +8,51 @@ export class Form extends Component {
   state = {
     project: '',
     body: '',
+    suggestions: [],
   };
 
   // Prop validation for expected type
   static propTypes = {
     addTask: PropTypes.func.isRequired,
+    tasks: PropTypes.array.isRequired, // Array of tasks from Redux state
   };
 
   // Event handler for input changes
-  onChange = (e) => this.setState({ [e.target.name]: e.target.value });
+  onChange = (e) => {
+    const { name, value } = e.target;
+
+    // If the field is for project name, filter suggestions based on existing project names
+    if (name === 'project') {
+      const { tasks } = this.props;
+      const projectSet = new Set(tasks.map(task => task.project));
+      const suggestions = Array.from(projectSet).filter(project =>
+        project.toLowerCase().startsWith(value.toLowerCase())
+      );
+
+      this.setState({
+        [name]: value,
+        suggestions,
+      });
+    } else {
+      // For other fields, do not show any suggestions
+      this.setState({
+        [name]: value,
+        suggestions: [],
+      });
+    }
+  };
+
+  // Event handler for input field focus
+  onFocus = () => {
+    const { tasks } = this.props;
+
+    const projectSet = new Set(tasks.map(task => task.project));
+    const suggestions = Array.from(projectSet);
+
+    this.setState({
+      suggestions,
+    });
+  };
 
   // Event handler for form submission
   onSubmit = (e) => {
@@ -30,24 +66,33 @@ export class Form extends Component {
     this.setState({
       project: '',
       body: '',
+      suggestions: [], // Clear suggestions after submission
     });
   };
 
   render() {
-    const { project, body } = this.state;
+    const { project, body, suggestions } = this.state;
     return (
       <div className="form-group">
         <form onSubmit={this.onSubmit} className="row">
           <div className="col-4">
-            {/* Input field for the project name */}
+            {/* Input field for the project name with suggestions */}
             <input
               className="form-control"
               type="text"
               name="project"
               placeholder="Project Name"
               onChange={this.onChange}
+              onFocus={this.onFocus}
               value={project}
+              list="project-suggestions" // Associate input with the datalist
             />
+            {/* Suggestions dropdown */}
+            <datalist id="project-suggestions">
+              {suggestions.map((item, index) => (
+                <option key={index} value={item} />
+              ))}
+            </datalist>
           </div>
           <div className="col-6">
             {/* Input field for the task description */}
@@ -62,7 +107,7 @@ export class Form extends Component {
           </div>
           <div className="col-2">
             {/* Submit button to add the task */}
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" style={{ marginTop: '-2px' }}>
               Add
             </button>
           </div>
@@ -72,5 +117,10 @@ export class Form extends Component {
   }
 }
 
+// Mapping Redux state to component props
+const mapStateToProps = (state) => ({
+  tasks: state.tasks.tasks, // Assuming tasks are stored in state.tasks.tasks
+});
+
 // Connecting the Form component to the Redux store and mapping the addTask action
-export default connect(null, { addTask })(Form);
+export default connect(mapStateToProps, { addTask })(Form);

@@ -16,7 +16,7 @@ export class TasksApp extends Component {
           Tasks
         </h1>
         <Fragment>
-          <div>
+          <div className="px-5">
             <Tasks />
           </div>
         </Fragment>

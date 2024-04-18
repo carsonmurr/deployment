@@ -1,7 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-const Settings = () => {
+const Settings = ({ user }) => {
+    if (!user) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className='container'>
             <h1 style={{ textAlign: 'center' }} className="mb-4"> General </h1>
@@ -17,4 +23,12 @@ const Settings = () => {
     );
 };
 
-export default Settings;
+Settings.propTypes = {
+    user: PropTypes.object,
+};
+
+const mapStateToProps = (state) => ({
+    user: state.auth.user,
+});
+
+export default connect(mapStateToProps)(Settings);

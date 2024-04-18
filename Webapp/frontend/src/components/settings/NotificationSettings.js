@@ -9,11 +9,12 @@ import '../styles/Settings.css';
 
 const NotificationSettings = ({ auth, updateUser }) => {
     // Initialize local state with user's notification settings from Redux
-    const [allowNotifications, setAllowNotifications] = useState(auth.user.allowNotifications);
-    const [notifyThrough, setNotifyThrough] = useState(auth.user.notifyThrough);
-    const [meetingRequests, setMeetingRequests] = useState(auth.user.notifyforMessages);
-    const [messages, setMessages] = useState(auth.user.notifyforEvents);
-    const [taskDeadlines, setTaskDeadlines] = useState(auth.user.notifyforTasks);
+    const [loading, setLoading] = useState(true); // State to track loading status
+    const [allowNotifications, setAllowNotifications] = useState(false);
+    const [notifyThrough, setNotifyThrough] = useState('');
+    const [meetingRequests, setMeetingRequests] = useState(false);
+    const [messages, setMessages] = useState(false);
+    const [taskDeadlines, setTaskDeadlines] = useState(false);
 
     // Function to toggle the state of a notification setting
     const toggleSetting = (setter) => {
@@ -53,14 +54,20 @@ const NotificationSettings = ({ auth, updateUser }) => {
     };
 
     useEffect(() => {
-        // Update local state with new user data from Redux when it changes
-        setAllowNotifications(auth.user.allowNotifications);
-        setNotifyThrough(auth.user.notifyThrough);
-        setMeetingRequests(auth.user.notifyforEvents);
-        setMessages(auth.user.notifyforMessages);
-        setTaskDeadlines(auth.user.notifyforTasks);
+        if (auth.user) {
+            // Update local state with new user data from Redux when it changes
+            setAllowNotifications(auth.user.allowNotifications);
+            setNotifyThrough(auth.user.notifyThrough);
+            setMeetingRequests(auth.user.notifyforEvents);
+            setMessages(auth.user.notifyforMessages);
+            setTaskDeadlines(auth.user.notifyforTasks);
+            setLoading(false); // Set loading to false once user data is available
+        }
     }, [auth.user]); // Trigger useEffect whenever auth.user changes
 
+    if (loading) {
+        return <div>Loading...</div>;
+    }
     return (
         <div className="container p-4 rounded">
             <h2 className="mb-4">Notification Settings</h2>

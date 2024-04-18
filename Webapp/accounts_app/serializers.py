@@ -5,7 +5,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-
+import re
+from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
@@ -97,7 +98,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         instance.notifyforMessages = validated_data.get('notifyforMessages', instance.notifyforMessages)
 
         instance.save()
-        print(validated_data)
+        # print(validated_data)
         return instance
 
     

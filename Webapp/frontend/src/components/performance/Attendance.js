@@ -10,6 +10,7 @@ import CompletedTasks from "../tasks/CompletedTasks";
 
 class Attendance extends Component {
   state = {
+    loading: true,
     attendedMeetingsCount: null,
     unattendedMeetingsCount: null,
     completionPercentage: null,
@@ -31,6 +32,7 @@ class Attendance extends Component {
 
   fetchData = async () => {
     try {
+      this.setState({ loading: true });
       const { timeRange } = this.state;
       await this.props.fetchAttendedMeetingsCount(timeRange);
       await this.props.fetchUnattendedMeetingsCount(timeRange);
@@ -39,9 +41,10 @@ class Attendance extends Component {
       const totalMeetingsCount = attendedMeetingsCount + unattendedMeetingsCount;
       const completionPercentage = totalMeetingsCount === 0 ? 0 : (attendedMeetingsCount / totalMeetingsCount) * 100;
 
-      this.setState({ attendedMeetingsCount, unattendedMeetingsCount, completionPercentage, chartKey: Date.now() });
+      this.setState({ loading: false, attendedMeetingsCount, unattendedMeetingsCount, completionPercentage, chartKey: Date.now() });
     } catch (error) {
       console.error("Error fetching calendar data:", error);
+      this.setState({ loading: false });
     }
   };
 
@@ -57,8 +60,10 @@ class Attendance extends Component {
 
 
   render() {
-      const { completionPercentage, attendedMeetingsCount, unattendedMeetingsCount, timeRange, chartKey } = this.state;
-
+      const { loading, completionPercentage, attendedMeetingsCount, unattendedMeetingsCount, timeRange, chartKey } = this.state;
+      if (loading) {
+        return <div>Loading...</div>;
+      }
 
   const meetingSummary = [
     {task: "Meetings Attended", value: attendedMeetingsCount || 0},

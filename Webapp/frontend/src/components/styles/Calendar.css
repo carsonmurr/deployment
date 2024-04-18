@@ -1,5 +1,10 @@
 .fc-day-today {
-    background: #FFF6E0 !important;
+    background: #ffffff !important;
+    border: none !important;
+} 
+
+.fc-daygrid-day-number{
+    color: #2c3e50 !important;
     border: none !important;
 } 
 

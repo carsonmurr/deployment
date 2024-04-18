@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react';
-// import ReactDOM from 'react-dom/client';
-import {render} from "react-dom"
+import ReactDOM from 'react-dom/client';
 import { HashRouter as Router, Route,Routes, Navigate } from 'react-router-dom';
 
 // Alerts
@@ -34,9 +33,8 @@ import Calendar from './calendar/Calendar';
 import Discussions from './discussions/Discussions';
 import Messages from './discussions/Messages';
 import Performance from './performance/Performance';
-//import Discussion from './discussions/Discussion';
-//import DiscussionMain from './discussions/DiscussionMain';
-//import NewDiscussion from './discussions/NewDiscussion';
+import Home from './home/Home';
+import About from './home/About';
 
 // Performance
 import Tasks from './performance/Tasks';
@@ -68,98 +66,28 @@ class App extends Component{
                             <Navbar/>
                             <Alerts/>
                                 <Routes>
-                                    <Route exact path ="/" element= {
-                                        <PrivateRoute>
-                                            <Dashboard/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/profile" element= {
-                                        <PrivateRoute>
-                                            <Profile/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/register" element={
-                                        <Register/>
-                                    }/>
-                                    <Route exact path ="/login" element={
-                                        <Login/>
-                                    }/>
-                                    <Route exact path ="/tasks" element= {
-                                        <PrivateRoute>
-                                            <TasksApp/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/tasks/completed" element= {
-                                        <PrivateRoute>
-                                            <CompletedTasks/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings" element= {
-                                        <PrivateRoute>
-                                            <Settings/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings/about" element= {
-                                        <PrivateRoute>
-                                            <AboutUs/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings/notifications" element= {
-                                        <PrivateRoute>
-                                            <NotificationSettings/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings/privacy" element= {
-                                        <PrivateRoute>
-                                            <PrivacyPolicy/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings/help" element= {
-                                        <PrivateRoute>
-                                            <HelpAndSupport/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/settings/account" element= {
-                                        <PrivateRoute>
-                                            <AccountSettings/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/forgot-password" element= {
-                                        <ForgotPassword/>
-                                    }/>
-                                    <Route exact path ="/reset-password" element= {
-                                        <ResetPassword/>
-                                    }/>
-                                    <Route exact path ="/calendar" element= {
-                                        <PrivateRoute>
-                                            <Calendar/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/discussions" element= {
-                                        <PrivateRoute>
-                                            <Discussions/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/messages/:discussionId" element= {
-                                        <PrivateRoute>
-                                            <Messages/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/performance" element= {
-                                        <PrivateRoute>
-                                            <Performance/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/performance/tasks" element= {
-                                        <PrivateRoute>
-                                            <Tasks/>
-                                        </PrivateRoute>
-                                    }/>
-                                    <Route exact path ="/performance/attendance" element= {
-                                        <PrivateRoute>
-                                            <Attendance/>
-                                        </PrivateRoute>
-                                    }/>
+                                    <Route exact path ="/" element= {<PrivateRoute> <Dashboard/> </PrivateRoute> }/>
+                                    <Route exact path ="/profile" element= {<Profile/>}/>
+                                    <Route exact path ="/register" element={<Register/>}/>
+                                    <Route exact path ="/login" element={<Login/>}/>
+                                    <Route exact path ="/home" element={<Home/>}/>
+                                    <Route exact path ="/about" element={<About/>}/>
+                                    <Route exact path ="/tasks" element= {<TasksApp/>}/>
+                                    <Route exact path ="/tasks/completed" element= {<PrivateRoute><CompletedTasks/></PrivateRoute>}/>
+                                    <Route exact path ="/settings" element= {<Settings/>}/>
+                                    <Route exact path ="/settings/about" element= {<AboutUs/>}/>
+                                    <Route exact path ="/settings/notifications" element= {<NotificationSettings/>}/>
+                                    <Route exact path ="/settings/privacy" element= {<PrivacyPolicy/>}/>
+                                    <Route exact path ="/settings/help" element= {<HelpAndSupport/>}/>
+                                    <Route exact path ="/settings/account" element= {<AccountSettings/>}/>
+                                    <Route exact path ="/forgot-password" element= {<ForgotPassword/>}/>
+                                    <Route exact path ="/reset-password" element= {<ResetPassword/>}/>
+                                    <Route exact path ="/calendar" element= {<Calendar/>}/>
+                                    <Route exact path ="/discussions" element= {<Discussions/>}/>
+                                    <Route exact path ={`/messages/:discussionId`} element= {<Messages/>}/>
+                                    <Route exact path ="/performance" element= {<Performance/>}/>
+                                    <Route exact path ="/performance/tasks" element= {<Tasks/>}/>
+                                    <Route exact path ="/performance/attendance" element= {<Attendance/>}/>
                                 </Routes>
                         </Fragment>
                     </Router>
@@ -169,16 +97,13 @@ class App extends Component{
     }
 }
 
-// ReactDOM.createRoot(
-//     document.getElementById("app"),
-//     )
-//     .render(
-//         <React.StrictMode>
-//             <App />
-//         </React.StrictMode>
-//     );
-
-const root = document.getElementById("app");
-render(<App />, root);
+ReactDOM.createRoot(
+    document.getElementById("app"),
+    )
+    .render(
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    );
 
 document.body.style.backgroundColor = '#FFF6E0';

@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { getDiscussions, addDiscussion } from '../../actions/discussions';
+import { getDiscussions, addDiscussion, updateDiscussion } from '../../actions/discussions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
+const Discussions = ({ user, auth, getDiscussions, addDiscussion, updateDiscussion, discussions }) => {
+  if (!user) {
+    return <div>Loading...</div>;
+  }
   const [allUsernames, setAllUsernames] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [newDiscussionTitle, setNewDiscussionTitle] = useState('');
@@ -60,6 +63,13 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
     }
   };
 
+  const handleRemoveDiscussion = (e) => {
+    const removedDiscussion = e;
+    removedDiscussion.active = false;
+    updateDiscussion(removedDiscussion);
+    setDiscussions(localdiscussions.filter(discussion => discussion !== e));
+  }
+
   return (
     <div>
       <h1>Messages</h1>
@@ -74,8 +84,9 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
           onChange={(event, newValue) => {
             setSelectedUsers(newValue);
           }}
+          disabled={optionUsers.length === 0}
           renderInput={(params) => (
-            <TextField {...params} variant="outlined" label="Select Users" placeholder="Add Users" />
+            <TextField {...params} variant="outlined" label={optionUsers.length === 0 ? "No other users in your organization" : "Add Users"} />
           )}
         />
         <div style={{ marginTop: '20px' }}>
@@ -85,6 +96,7 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
             fullWidth
             value={newDiscussionTitle}
             onChange={(e) => setNewDiscussionTitle(e.target.value)}
+            disabled={optionUsers.length === 0}
           />
         </div>
         <button onClick={handleCreateDiscussion} style={{ marginTop: '20px' }}>Create Discussion</button>
@@ -92,20 +104,20 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
       <h2>All Discussions</h2>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
         {localdiscussions.map((discussion) => (
-          <li key={discussion.id} style={{ marginBottom: '20px', padding: '10px', border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#61677A' }}>
-            <Link to={`/messages/${discussion.id}`} style={{ textDecoration: 'none', color: 'black' }}>
+          <li key={discussion.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', padding: '10px', border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#61677A'}}>
+            <Link to={`/messages/${discussion.id}`} style={{ textDecoration: 'none', color: 'black', flex: 1 }} onMouseEnter={(e) => { e.currentTarget.parentElement.style.backgroundColor = '#d8d9da'; }} onMouseLeave={(e) => { e.currentTarget.parentElement.style.backgroundColor = '#61677A'; }}>
               <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '5px' }}>
                 Discussion: {discussion.title}
               </div>
-              <div style={{ fontSize: '14px', color: '#FFF', marginBottom: '10px' }}>
+              <div style={{ fontSize: '14px', color: '#111', marginBottom: '10px' }}>
                 Created: {new Date(discussion.created_at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}
               </div>
-              <div style={{ fontSize: '14px', color: '#FFF' }}>
+              <div style={{ fontSize: '14px', color: '#111' }}>
                 To: {discussion.users.map(userId => 
-                  allUsernames.find(user => user.id === userId)?.username || 'You').join(', ')
-                }
+                allUsernames.find(user => user.id === userId)?.username || 'You').join(', ')}
               </div>
             </Link>
+            { discussion.created_by === auth.user.id && (<button onClick={() => handleRemoveDiscussion(discussion)} style={{ color: '#fff', backgroundColor:'#333'}}>Delete Discussion</button>)}
           </li>
         ))}
       </ul>
@@ -114,15 +126,18 @@ const Discussions = ({ auth, getDiscussions, addDiscussion, discussions }) => {
 };
 
 Discussions.propTypes = {
+  user: PropTypes.object,
   auth: PropTypes.object.isRequired,
   discussions: PropTypes.array.isRequired,
   getDiscussions: PropTypes.func.isRequired,
   addDiscussion: PropTypes.func.isRequired,
+  updateDiscussion: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
+  user: state.auth.user,
   auth: state.auth,
   discussions: state.discussions.discussions,
 });
 
-export default connect(mapStateToProps, { getDiscussions, addDiscussion })(Discussions);
+export default connect(mapStateToProps, { getDiscussions, addDiscussion, updateDiscussion })(Discussions);
