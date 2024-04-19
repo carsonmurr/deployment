@@ -19,5 +19,5 @@ height: 100%;
     font-family: 'Your Preferred Font', sans-serif;
   }
 .small-link:hover {
-    text-decoration: underline; /* Add underline on hover */
+    text-decoration: underline;
 }

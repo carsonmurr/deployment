@@ -1,0 +1,11 @@
+span{
+    display:none;
+}
+
+li:hover {
+    display:inline-block;
+}
+
+li:hover span {
+    display:inline-block;
+}

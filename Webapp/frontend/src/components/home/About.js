@@ -1,4 +1,6 @@
 import React from 'react';
+import "../styles/About.css";
+
 
 const About = () => {
   return (
@@ -31,11 +33,12 @@ const About = () => {
       </ul>
       <p>We hope for you to join us on our journey to redefine the way businesses operate.</p>
       <p>— WorkplaceWise Developers</p>
-      <ul> Our Team:
-        <li style={{marginTop:'20px'}}><a href="https://github.com/RebeccaCun">Rebecca Cunningham</a></li>
-        <li style={{marginTop:'20px'}}><a href="https://github.com/DevGosho160">Devon Goshorn</a></li>
-        <li style={{marginTop:'20px'}}><a href="https://github.com/hudsonhok">Hudson Hok</a></li>
-        <li style={{marginTop:'20px'}}><a href="https://github.com/carsonmurr">Carson Murray</a></li>
+      <p> Our Team:</p>
+      <ul style={{position: 'relative'}} >
+        <li style={{marginTop:'20px'}}><a href="https://github.com/RebeccaCun">Rebecca Cunningham</a> <span>Main Developer for Calendar, Notifications</span></li>
+        <li style={{marginTop:'20px'}}><a href="https://github.com/DevGosho160">Devon Goshorn</a> <span>Main Developer for Discussions</span></li>
+        <li style={{marginTop:'20px'}}><a href="https://github.com/hudsonhok">Hudson Hok</a> <span>Main Developer for Sign-up/Log-in, User Accounts/Account Settings, and Tasks</span></li>
+        <li style={{marginTop:'20px'}}><a href="https://github.com/carsonmurr">Carson Murray</a> <span>Main Developer for Performance, User Profile, User Accounts/Account Settings, Navigation Bar/Side Menu</span></li>
         <p style={{marginTop: '30px'}}>Link to Github Repository: <a href='https://github.com/SCCapstone/logic-terrors'>logic-terrors</a></p>
       </ul>
       </div>

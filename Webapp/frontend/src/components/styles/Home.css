@@ -38,4 +38,43 @@
   
   .video-container {
     padding: 20px;
+    width: 100%;
+    text-align: center;
   }
+
+  .pic-column {
+    float: left;
+    width: 70%;
+    padding: 10px;
+  }
+
+  .text-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    float: left;
+    width: 30%;
+    padding: 10px;
+  }
+
+  .left {
+    font-size: 18px;
+    text-align: left;
+  }
+
+  .right {
+    font-size: 18px;
+    text-align: right;
+  }
+
+  .pic-column h4 {
+    text-align: center;
+  }
+
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  

@@ -46,10 +46,10 @@ function Navbar({ isAuthenticated, logout }) {
   const guestLinks = (
     <>
       <div className="guest-links-container">
-        <Link to="/home" className="nav-link" style={{ fontSize: '18px' }}>
+        <Link to="/home" className="nav-link" style={{ fontSize: '18px', position: "relative", right: "60px" }}>
           Home
         </Link>
-        <Link to="/about" className="nav-link" style={{ fontSize: '18px' }}>
+        <Link to="/about" className="nav-link" style={{ fontSize: '18px', position: "relative", right: "60px" }}>
           About
         </Link>
       </div>

@@ -20,7 +20,8 @@ const Home = () => {
       </p>
       <h1 className="features-title">Our Features</h1>
       <div className="video-container">
-        <p>Here is a placeholder video for the Final Demo</p>
+        <p>Here is our PoC Demo video, which is serving as a placeholder video for the Final Demo video. 
+          Here, we discuss the many features of our application and the main cause/reasons for its creation. </p>
         <iframe
           width="900"
           height="600"
@@ -30,26 +31,34 @@ const Home = () => {
           allowFullScreen
         ></iframe>
       </div>
-      <div className="features">
-        <div className="feature">
+      <div className="row">
+        <div className="pic-column">
           <h4>Messaging and Collaboration</h4>
           <img src={messages} className='img-fluid' alt="Messaging and Collaboration"/>
-          <p>Stay connected with your team through real-time messaging and collaboration tools.</p>
         </div>
-        <div className="feature">
+        <div className="text-column">
+          <p className = "left"> Collaboration is integral to an efficient and healthy work environment. Use WorkPlaceWise's discussion feature to create discussions with your colleagues. Stay connected with your team with our real-time messaging and collaboration tools.</p>
+        </div>
+        <div className="text-column">
+          <p className = "right"> Have a project or assignment that you would like to keep track of? Efficiently manage projects and add, edit, and remove tasks with our intuitive task management system.</p>
+        </div>
+        <div className="pic-column">
           <h4>Task Management</h4>
           <img src={tasks} className='img-fluid' alt="Task Management"/>
-          <p>Efficiently manage projects and tasks with our intuitive task management system.</p>
         </div>
-        <div className="feature">
+        <div className="pic-column">
           <h4>Event Calendar</h4>
           <img src={calendar} className='img-fluid' alt="Event Calendar"/>
-          <p>Keep track of important deadlines and meetings with our integrated event calendar.</p>
         </div>
-        <div className="feature">
+        <div className="text-column">
+        <p className = "left">Keep track of important deadlines and meetings with our integrated event calendar. You can add your colleagues to meetings so that everyone can be on track with your events. Mark your attendance on meetings, mitigate the hassle of remembering your schedule, and spend that time getting things done!</p>
+        </div>
+        <div className="text-column">
+        <p className = "right">Gaining feedback on your performance is a important must for skill-building. Gain an automatic insight into your performance with our performance analytics. See if you are lacking in attendance, or check the tasks performance page to see how your task efficieny is doing. Take note of your results and improve from there!</p>
+        </div>
+        <div className="pic-column">
           <h4>Performance Analytics</h4>
           <img src={performance} className='img-fluid' alt="Performance Analytics"/>
-          <p>Gain insights into your performance with our performance analytics.</p>
         </div>
       </div>
     </div>

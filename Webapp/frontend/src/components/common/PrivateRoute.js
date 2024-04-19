@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
   // If not authenticated, it redirects the user to the login page using the Navigate component
   // The 'replace' prop is used to replace the current entry in the navigation history, preventing the user from going back to the protected route after logging in
 const PrivateRoute = ({ auth: { isAuthenticated }, children }) => {
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return isAuthenticated ? children : <Navigate to="/home" replace />;
 };
 
 const mapStateToProps = (state) => ({
