@@ -84,30 +84,42 @@ const Messages = ({ user, auth, getMessages, addMessage, updateDiscussion, discu
 
     const checkForNotifications = (userIn) => {
         if(userIn.notifyThrough === "Messages") {
-            const messageNotification = {
-                title: "System Notification: New Message in \""+discussion.title+"\"",
-                users: [...new Set([userIn.id, auth.user.id])], created_by: auth.user.id,
-              };
-              addDiscussion(messageNotification).then(() => {getDiscussions();});
-              getMessages();
-              getDiscussions();
-              fetch('/api/discussions/', {
+            fetch('/api/discussions/', {
                 method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Token ${auth.token}`,
-                },
-              }).then(response => response.json())
-              .then(data => {
-                let filter = data.find((diss) => diss.title ===  "System Notification: New Message in \""+discussion.title+"\"");
-                const message = {discussion: filter.id, sender: auth.user.id,
-                  content: "Hello, \nThere is a new message in the \""+discussion.title+"\" Discussion that you are a part of with "+discussion.users.length-1+" other person/people.",
-                };
-                addMessage(message);
-              });
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${auth.token}`,
+                    },
+                }).then(response => response.json())
+                .then(data => {
+                    let filter = data.find((diss) => diss.title == "System Notification: New Message in \""+discussion.title+"\"");
+                    if(typeof filter == "undefined") {
+                        const messageNotification = {
+                            title: "System Notification: New Message in \""+discussion.title+"\"",
+                            users: [...new Set([userIn.id, auth.user.id])], created_by: auth.user.id,
+                        };
+                        addDiscussion(messageNotification).then(() => {getDiscussions();});
+                    }
+                    getMessages();
+                    getDiscussions();
+                    fetch('/api/discussions/', {
+                        method: 'GET',
+                        headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${auth.token}`,
+                    },
+                    }).then(response => response.json())
+                    .then(data => {
+                        let filter = data.find((diss) => diss.title ===  "System Notification: New Message in \""+discussion.title+"\"");
+                        const message = {discussion: filter.id, sender: auth.user.id,
+                        content: "Hello, there is a new message in the \""+discussion.title+"\" Discussion that you are a part of with "+(discussion.users.length-1)+" other person/people.",
+                        };
+                        addMessage(message);
+                    });
+                });
         }
         if(userIn.notifyThrough === "Email") {sendMessageEmailNotification({ participant_email: userIn.email, title: discussion.title, number_of_discussionUsers: discussion.users.length-1});}
-      }
+    }
 
     const handleRemoveUser = (userId) => {
         if (discussion && discussion.created_by === auth.user.id) { 

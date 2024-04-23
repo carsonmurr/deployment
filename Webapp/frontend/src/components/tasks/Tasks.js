@@ -63,8 +63,8 @@ class Tasks extends Component {
   };
 
   // Event handler for updating task completion status
-  handleUpdateCompletion = (taskId, completed) => {
-    this.props.updateCompletion(taskId, completed);
+  handleUpdateCompletion = (taskId, completed, project, body) => {
+    this.props.updateCompletion(taskId, completed, project, body);
   };
 
   // Event handler for adding a new task
@@ -159,7 +159,7 @@ class Tasks extends Component {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => this.handleUpdateCompletion(task.id, !task.completed)}
+                    onChange={() => this.handleUpdateCompletion(task.id, !task.completed, task.project, task.body)}
                   />
                 </td>
                 {/* Editable project field */}

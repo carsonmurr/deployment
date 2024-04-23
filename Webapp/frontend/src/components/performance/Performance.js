@@ -60,6 +60,7 @@ class Performance extends Component {
     }
   };
 
+    // Initiates a fetch for data if the time range changes
   handleTimeRangeChange = (event) => {
     const timeRange = event.target.value;
     this.setState({ timeRange }, () => {
@@ -87,6 +88,7 @@ class Performance extends Component {
     { name: 'C', value: 50, color: 'green' },
   ];
 
+  // Task data
   const taskSummary = [
     {task: "Tasks Completed", value: 300},
     {task: "Tasks Not Completed", value: 25},
@@ -98,8 +100,8 @@ class Performance extends Component {
   const iR = 50;
   const oR = 200;
   var value = 0;
-
-// // calculating value of the speedometer
+  
+  // calculating value of the speedometer
   if (completedTasksCount == 0 && unfinishedTasksCount == 0) {
     // Case where there are no tasks but there are meetings created
     value = 25 + meetingCompletionPercentage;
@@ -116,10 +118,12 @@ class Performance extends Component {
     value = 25 + temp;  // position of the needle
   }
 
+  // Color to number corresponding values:
   // 25 = Red
   // 75 = Yellow
   // 125 = Green
 
+  // setup for the speedometer needle
   const needle = (value, data, cx, cy, iR, oR, color) => {
 
   let total = 0;
@@ -147,7 +151,6 @@ class Performance extends Component {
 };
   const totalMeetingsCount = attendedMeetingsCount + unattendedMeetingsCount;
   const totalTasksCount = completedTasksCount + unfinishedTasksCount;
-// {this.handleTimeRangeChange("month")}
   if (totalMeetingsCount + totalTasksCount == 0) {
     return (
       <div>
@@ -161,7 +164,6 @@ class Performance extends Component {
 
                   <h1 style={{ textAlign: 'center' }} className='mb-4'>Perfomance and Statistics</h1>
 
-        {/* <div> */}
         <h2>Overall Perfomance</h2>
                   {/* Speedometer  */}
       <ResponsiveContainer width='99%' height={300}>
@@ -171,7 +173,6 @@ class Performance extends Component {
             startAngle={180}
             endAngle={0}
             data={data}
-            // cx= {1350 / 2}  // value of piehchart width is 1350
             cx = {cx}
             cy={cy}
             innerRadius={iR}
@@ -183,9 +184,7 @@ class Performance extends Component {
               <Cell style={{outline: 'none'}} key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          {/* <ResponsiveContainer width='99%' height={300}> */}
            {needle(value, data, cx, cy, iR, oR, 'black')}
-          {/* </ResponsiveContainer> */}
 
         </PieChart>
       </ResponsiveContainer>

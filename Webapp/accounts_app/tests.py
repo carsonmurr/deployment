@@ -8,24 +8,24 @@ class CustomUserModelTest(TestCase):
 
     def test_create_user(self):
         user = CustomUser.objects.create_user(
-            username='testuser',
-            password='testpassword',
+            username='TestingAccount',
+            password='Test123!@#',
             email='test@example.com',
-            employee_id='12345'
+            employee_id='TES123'
         )
-        self.assertEqual(user.username, 'testuser')
-        self.assertTrue(user.check_password('testpassword'))
+        self.assertEqual(user.username, 'TestingAccount')
+        self.assertTrue(user.check_password('Test123!@#'))
         self.assertTrue(user.is_active)
 
     def test_create_superuser(self):
         admin = CustomUser.objects.create_superuser(
             username='admin',
-            password='adminpassword',
+            password='Test123!@#',
             email='admin@example.com',
-            employee_id='54321'
+            employee_id='TES123'
         )
         self.assertEqual(admin.username, 'admin')
-        self.assertTrue(admin.check_password('adminpassword'))
+        self.assertTrue(admin.check_password('Test123!@#'))
         self.assertTrue(admin.is_active)
         self.assertTrue(admin.is_staff)
         self.assertTrue(admin.is_superuser)
@@ -35,10 +35,10 @@ class RegisterSerializerTest(TestCase):
 
     def test_valid_data(self):
         serializer = RegisterSerializer(data={
-            'username': 'testuser',
-            'password': 'testpassword',
+            'username': 'TestingAccount',
+            'password': 'Test123!@#',
             'email': 'test@example.com',
-            'employee_id': '12345'
+            'employee_id': 'TES123'
         })
         self.assertTrue(serializer.is_valid())
 
@@ -51,13 +51,13 @@ class LoginSerializerTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = CustomUser.objects.create_user(
-            username='testuser',
-            password='testpassword',
+            username='TestingAccount',
+            password='Test123!@#',
             email='test@example.com',
-            employee_id='12345'
+            employee_id='TES123'
         )
         self.login_url = reverse('login')
-        self.login_data = {'username': 'testuser', 'password': 'testpassword'}
+        self.login_data = {'username': 'TestingAccount', 'password': 'Test123!@#'}
 
     def test_valid_login(self):
         serializer = LoginSerializer(data=self.login_data)
@@ -69,7 +69,7 @@ class LoginSerializerTest(TestCase):
         self.assertIn('user', response.data)
 
     def test_invalid_login(self):
-        invalid_data = {'username': 'testuser', 'password': 'wrongpassword'}
+        invalid_data = {'username': 'TestingAccount', 'password': 'wrongpassword'}
         serializer = LoginSerializer(data=invalid_data)
         self.assertFalse(serializer.is_valid())
 

@@ -37,7 +37,7 @@ const Home = () => {
           <img src={messages} className='img-fluid' alt="Messaging and Collaboration"/>
         </div>
         <div className="text-column">
-          <p className = "left"> Collaboration is integral to an efficient and healthy work environment. Use WorkPlaceWise's discussion feature to create discussions with your colleagues. Stay connected with your team with our real-time messaging and collaboration tools.</p>
+          <p className = "left"> Collaboration is integral to an efficient and healthy work environment. Use WorkPlaceWise's discussion feature to create discussions with your colleagues. Stay connected with your team with our messaging and collaboration tools.</p>
         </div>
         <div className="text-column">
           <p className = "right"> Have a project or assignment that you would like to keep track of? Efficiently manage projects and add, edit, and remove tasks with our intuitive task management system.</p>

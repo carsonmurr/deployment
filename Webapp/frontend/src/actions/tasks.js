@@ -64,18 +64,18 @@ export const deleteTask = (taskId) => (dispatch, getState) => {
 };
 
 // UPDATE COMPLETION STATUS
-export const updateCompletion = (taskId, completed) => (dispatch, getState) => {
-  axios
-    .put(`/api/tasks/${taskId}/`, { completed }, tokenConfig(getState))
-    .then((res) => {
-      dispatch(createMessage({ updateCompletion: 'Completion Status Updated' }));
-      dispatch({
-        type: UPDATE_COMPLETION,
-        payload: res.data,
-      });
-    })
-    .catch((err) => dispatch(returnErrors(err.response.data, err.response.status)));
-};
+export const updateCompletion = (taskId, completed, project, body) => (dispatch, getState) => {
+    axios
+      .put(`/api/tasks/${taskId}/`, { completed, project, body }, tokenConfig(getState))
+      .then((res) => {
+        dispatch(createMessage({ updateCompletion: 'Completion Status Updated' }));
+        dispatch({
+          type: UPDATE_COMPLETION,
+          payload: res.data,
+        });
+      })
+      .catch((err) => dispatch(returnErrors(err.response.data, err.response.status)));
+  };
 
 // GET COMPLETED TASKS
 export const fetchCompletedTasksCount = (timeRange) => async (dispatch, getState) => {

@@ -72,7 +72,7 @@ const Discussions = ({ user, auth, getDiscussions, addDiscussion, updateDiscussi
 
   return (
     <div>
-      <h1>Messages</h1>
+      <h1>Discussions</h1>
       <div>
         <h2>Create a Discussion</h2>
         <Autocomplete

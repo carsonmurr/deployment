@@ -27,7 +27,7 @@ export default function (state = initialState, action) {
 			return {
 				...state,
 				tasks: state.tasks.map((task) =>
-				  task.id === action.payload.id ? action.payload : task),
+				task.id === action.payload.id ? action.payload : task),
 			  };
 		case DELETE_TASK:
 			// Update the state with the tasks array excluding the deleted task

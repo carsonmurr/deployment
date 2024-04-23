@@ -2,8 +2,10 @@ import React, { useEffect, Component, Fragment} from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {getEvents, addEvent, deleteEvent, updateEvent, addEventToAll} from '../../actions/calendarEvents';
-import { getDiscussions, addDiscussion, addMessage } from '../../actions/discussions';
+import { getDiscussions, addDiscussion, addMessage, getMessages } from '../../actions/discussions';
 import { sendEventEmailNotification } from '../../actions/auth';
+import { createMessage } from '../../actions/messages';
+import { withAlert } from 'react-alert';
 
 import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -15,7 +17,8 @@ import TextField from '@material-ui/core/TextField';
 
 import '../styles/Calendar.css';
 
-function StartEnd({startStr, endStr, allDay, description, attendance}) {
+function StartEnd ({startStr, endStr, allDay, description, attendance}) {
+  if (description == "") description = "No description given.";
   if (allDay) return <div> 
                        <p>Date: {startStr}</p> 
                        <p>Description: {description}</p> 
@@ -23,29 +26,15 @@ function StartEnd({startStr, endStr, allDay, description, attendance}) {
   else {
     let date = new Date(startStr);
     let formattedDate = (date.getMonth()+1)+"-"+date.getDate()+"-"+date.getFullYear();
-    let formattedStartTime = date.toLocaleString('en-US', {
-      hour: 'numeric', minute: 'numeric', hour12: true,
-    });
-    let formattedEndTime = new Date(endStr).toLocaleString('en-US', {
-      hour: 'numeric', minute: 'numeric', hour12: true,
-    });
-    if(attendance) {
-      return <div> 
-              <p>Date: {formattedDate}</p> 
-              <p>Start time: {formattedStartTime}</p> 
-              <p>End time: {formattedEndTime}</p> 
-              <p>Description: {description}</p> 
-              <p>Attending: Yes </p>
-           </div>
-    } else {
-      return <div> 
-              <p>Date: {formattedDate}</p> 
-              <p>Start time: {formattedStartTime}</p> 
-              <p>End time: {formattedEndTime}</p> 
-              <p>Description: {description}</p> 
-              <p>Attending: No </p>
-           </div>
-    }
+    let formattedStartTime = date.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true,});
+    let formattedEndTime = new Date(endStr).toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true,});
+    return <div> 
+            <p>Date: {formattedDate}</p> 
+            <p>Start time: {formattedStartTime}</p> 
+            <p>End time: {formattedEndTime}</p> 
+            <p>Description: {description}</p> 
+            <p>Attending: {attendance ? 'Yes' : 'No'} </p>
+          </div>
   }
 }
 
@@ -91,10 +80,6 @@ export class Calendar extends Component {
     participants: []
   };
 
-  attendButton = ({allDay}) => {
-    if(!allDay) {return <Button id="attendButton" color="primary" onClick={this.toggleDescriptionShowAttendance}> Confirm Attendance</Button>}
-  }
-
   componentDidMount() {
     this.props.getEvents();
     this.props.getDiscussions();
@@ -117,6 +102,8 @@ export class Calendar extends Component {
     this.toggleAttendance();
   };
 
+  AttendButton = ({allDay}) => {if(!allDay) {return <Button id="attendButton" color="primary" onClick={this.toggleDescriptionShowAttendance}> Confirm Attendance</Button>}}
+
   toggleAddShowMeeting = () => {
     fetch('/api/company-users/', {
       method: 'GET',
@@ -127,29 +114,11 @@ export class Calendar extends Component {
     }).then(response => response.json())
     .then(data => {
       let newData = data.users.filter(user => user.username !== this.props.auth.user.username);
-      if (newData == null) this.setState({ companyUsers: 'You have no users in your organization' });
-      else this.setState({ companyUsers: newData });
+      this.setState({ companyUsers: newData });
       this.toggleAdd();
       this.toggleMeeting();
     });
   };
-
-  // toggleAddShowCreateForm = (number) => {
-  //   fetch('/api/company-users/', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': `Token ${this.state.token}`,
-  //     },
-  //   }).then(response => response.json())
-  //   .then(data => {
-  //     //data = data.users.filter(user => user.username !== localStorage.getItem('user.username'))
-  //     this.setState({ companyUsers: data.users });
-  //     this.toggleAdd()
-  //     if (number==1) {this.toggleMeeting();}
-  //     else this.toggleDeadline();
-  //   });
-  // };
 
   toggleAddShowDeadline = () => {
     fetch('/api/company-users/', {
@@ -161,8 +130,7 @@ export class Calendar extends Component {
     }).then(response => response.json())
     .then(data => {
       let newData = data.users.filter(user => user.username !== this.props.auth.user.username);
-      if (newData == null) this.setState({ companyUsers: 'You have no users in your organization' });
-      else this.setState({ companyUsers: newData });      
+      this.setState({ companyUsers: newData });      
       this.toggleAdd();
       this.toggleDeadline();
     });
@@ -196,9 +164,11 @@ export class Calendar extends Component {
 
   checkForParticipants = () => {
     if(this.state.participants.length != 0) {
-      for (let j = 0; j < this.state.participants[0].length; j++) {
+      console.log(this.state.participants);
+      for (let j = 0; j < this.state.participants[(this.state.participants.length-1)].length; j++) {
+        console.log(this.state.participants[(this.state.participants.length-1)][j].id);
         const add = {
-          creator: this.state.participants[0][j].id,
+          creator: this.state.participants[(this.state.participants.length-1)][j].id,
           title: this.state.event.title,
           start: this.state.event.start,
           end: this.state.event.end,
@@ -206,54 +176,84 @@ export class Calendar extends Component {
           description: this.state.event.description
         };
         this.props.addEventToAll(add);
-        if(this.state.participants[0][j].allowNotifications && this.state.participants[0][j].notifyforEvents){this.checkForNotifications(this.state.participants[0][j])};
+        if(this.state.participants[(this.state.participants.length-1)][j].allowNotifications && this.state.participants[(this.state.participants.length-1)][j].notifyforEvents){this.checkForNotifications(this.state.participants[(this.state.participants.length-1)][j])};
       }
     }
   }
 
   checkForNotifications = (participant) => {
     if(participant.notifyThrough === "Messages") {
-      const messageNotification = {
-        title: "System Notification: New Event \""+this.state.event.title+"\"",
-        users: [...new Set([participant.id, this.props.auth.user.id])], created_by: this.props.auth.user.id,
-      };
-      this.props.addDiscussion(messageNotification).then(() => {this.props.getDiscussions();});
-      this.componentDidMount();
-
       fetch('/api/discussions/', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${this.state.token}`,
-        },
-      }).then(response => response.json())
-      .then(data => {
-        let filter = data.find((diss) => diss.title ===  "System Notification: New Event \""+this.state.event.title+"\"");
-        const message = {discussion: filter.id, sender: this.props.auth.user.id,
-          content: "You have been added to the event \""+this.state.event.title+"\" as an participant. \nThis event was created by user "+this.props.auth.user.username+".",
-        };
-        this.props.addMessage(message);
-      });
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${this.state.token}`,
+            },
+        }).then(response => response.json())
+        .then(data => {
+            let filter = data.find((diss) => diss.title == "System Notification: New Event \""+this.state.event.title+"\"");
+            if(typeof filter == "undefined") {
+              const messageNotification = {
+                title: "System Notification: New Event \""+this.state.event.title+"\"",
+                users: [...new Set([participant.id, this.props.auth.user.id])], created_by: this.props.auth.user.id,
+              };
+              this.props.addDiscussion(messageNotification).then(() => {this.props.getDiscussions();});
+              this.componentDidMount();
+            }
+            getMessages();
+            getDiscussions();
+            fetch('/api/discussions/', {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${this.state.token}`,
+            },
+            }).then(response => response.json())
+            .then(data => {
+              let filter = data.find((diss) => diss.title ===  "System Notification: New Event \""+this.state.event.title+"\"");
+              const message = {discussion: filter.id, sender: this.props.auth.user.id,
+                content: "You have been added to the event \""+this.state.event.title+"\" as an participant. \nThis event was created by user "+this.props.auth.user.username+".",
+              };
+              this.props.addMessage(message);
+            });
+        });
     }
     if(participant.notifyThrough === "Email") {this.props.sendEventEmailNotification({ participant_email: participant.email, title: this.state.event.title, sender: this.props.auth.user.username });}
   }
 
   addMeeting = () => {
+    const {alert} = this.props;
     let date1 = new Date(document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value);
     let date2 = new Date(document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_end').value);
-    if(document.getElementById('meeting_title').value === "" ||
-       document.getElementById('meeting_date').value === "" ||
-       document.getElementById('meeting_start').value === "" ||
-       document.getElementById('meeting_end').value === "" ||
-       document.getElementById('meeting_des').value.length > 500 ||
-       date1>date2) {
-      if (document.getElementById('meeting_title').value === "") {alert('Title cannot be blank' );}
-      if (document.getElementById('meeting_date').value === "") {alert('Invalid date.');}
-      if (document.getElementById('meeting_start').value === "") {alert('Start time cannot be blank');}
-      if (document.getElementById('meeting_end').value === "") {alert('End time cannot be blank');}
-      if (document.getElementById('meeting_des').value.length > 500) {alert('Description cannot be longer than 500 characters. \nPlease shorten the description.');}
-      if (date1>date2) {alert('The end time of a meeting must be after the start time.');}
-    } else {
+    if (document.getElementById('meeting_title').value === "") {
+      alert.error('Title cannot be blank.');
+      this.toggleMeeting();
+    }
+    else if (document.getElementById('meeting_date').value === "") {
+      alert.error('Invalid date.');
+      this.toggleMeeting();
+    }
+    else if (document.getElementById('meeting_start').value === "") {
+      alert.error('Invalid start time.');
+      this.toggleMeeting();
+    }
+    else if (document.getElementById('meeting_end').value === "") {
+      alert.error('Invalid end time.');
+      this.toggleMeeting();
+    }      
+    else if (document.getElementById('meeting_des').value.length > 500) {
+      alert.error('Description cannot be longer than 500 characters. \nPlease shorten the description.');
+      this.toggleMeeting();
+    } 
+    else if (document.getElementById('meeting_title').value.length > 200) {4
+      alert.error('Title cannot be longer than 200 characters. \nPlease shorten the title.');
+      this.toggleMeeting();
+    } 
+    else if (date1>date2) {
+      alert.error('The end time of a meeting must be after the start time.');
+      this.toggleMeeting();
+    }
+    else {
       this.state.event.title=document.getElementById('meeting_title').value;
       this.state.event.start=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_start').value;
       this.state.event.end=document.getElementById('meeting_date').value+"T"+document.getElementById('meeting_end').value;
@@ -265,19 +265,31 @@ export class Calendar extends Component {
       this.toggleMeeting();
 
       let currentDate = new Date();
-      if(currentDate>date1) alert('FYI: You are scheduling a meeting for a date that has already passed.');
+      if(currentDate>date1) alert.error('FYI: You are scheduling a meeting for a date that has already passed.');
     }
   }
 
-  addDeadline = () => { 
-    if(document.getElementById('deadline_title').value === "" ||
-       document.getElementById('deadline_date').value === "" ||
-       document.getElementById('deadline_des').value.length > 500) {
-      if (document.getElementById('deadline_title').value === "") {alert('Title cannot be blank' );}
-      if (document.getElementById('deadline_date').value === "") {alert('Invalid date.');}
-      if (document.getElementById('deadline_des').value.length > 500) {alert('Description cannot be longer than 500 characters. \nPlease shorten the description.');}
-    } else {
-      this.state.event.title = "["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value
+  addDeadline = () => {
+    const {alert} = this.props;
+    if (("["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value).length > 200) {
+      alert.error('Title + Urgency cannot be longer than 200 characters. \nPlease shorten the title.');
+      this.toggleDeadline();
+    }  
+    else if (document.getElementById('deadline_title').value === "") {
+      alert.error('Title cannot be blank');
+      this.toggleDeadline();
+    }
+    else if (document.getElementById('deadline_date').value === "") {
+      alert.error('Invalid date.');
+      this.toggleDeadline();
+    }
+    else if (document.getElementById('deadline_des').value.length > 500) {
+      alert('Description cannot be longer than 500 characters. \nPlease shorten the description.');
+      this.toggleDeadline();
+    }
+    else {
+      let titleEdit = "["+document.getElementById('urgency').value+"] "+document.getElementById('deadline_title').value
+      this.state.event.title = titleEdit;
       this.state.event.start = document.getElementById('deadline_date').value;
       this.state.event.allDay = true;
       this.state.event.description=document.getElementById("deadline_des").value;
@@ -339,7 +351,7 @@ export class Calendar extends Component {
           </ModalBody>
           <ModalFooter>
             <Button color="primary" onClick={this.toggleDescriptionShowCancel}> Cancel Event</Button>{" "}
-            <this.attendButton allDay = {this.state.event.allDay}/>
+            <this.AttendButton allDay = {this.state.event.allDay}/>
           </ModalFooter>
         </Modal>
 
@@ -416,7 +428,8 @@ export class Calendar extends Component {
                   getOptionLabel={(option) => option.username}
                   style={{width: 189}}
                   onChange={(event, newValue) => {this.state.participants.push(newValue);}}
-                  renderInput={(params) => (<TextField {...params} variant="outlined" label="Select Participants" placeholder="Add Participants" />)}                
+                  renderInput={(params) => (<TextField {...params} variant="outlined" label="Select Participants" placeholder="Add Participants" />)}
+                  noOptionsText = {"You have no other users in your organization."}                
                 />             
               </div>
               <br style={{clear: "both"}} />
@@ -467,7 +480,8 @@ export class Calendar extends Component {
                     getOptionLabel={(option) => option.username}
                     style={{width: 189}}
                     onChange={(event, newValue) => {this.state.participants.push(newValue);}}
-                    renderInput={(params) => (<TextField {...params} variant="outlined" label="Select Participants" placeholder="Add Participants" />)}                
+                    renderInput={(params) => (<TextField {...params} variant="outlined" label="Select Participants" placeholder="Add Participants" />)}
+                    noOptionsText = {"You have no other users in your organization."}                                
                   />    
                 </div>
                 <br style={{clear: "both"}} />
@@ -506,13 +520,8 @@ export class Calendar extends Component {
 const mapStateToProps = (state) => ({auth: state.auth, events: state.events.events,});
   
 export default connect(mapStateToProps, {
-  getEvents,
-  addEvent,
-  addEventToAll,
-  deleteEvent,
-  updateEvent,
-  getDiscussions,
-  addDiscussion,
-  addMessage,
+  getEvents, addEvent, addEventToAll, deleteEvent, updateEvent,
+  getDiscussions, addDiscussion, addMessage, getMessages,
   sendEventEmailNotification,
-})(Calendar);
+  createMessage,
+})(withAlert()(Calendar));

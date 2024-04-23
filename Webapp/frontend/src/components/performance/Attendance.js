@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Perfomance.css';
 import { fetchAttendedMeetingsCount, fetchUnattendedMeetingsCount } from '../../actions/calendarEvents';
 import { connect } from "react-redux";
-import CompletedTasks from "../tasks/CompletedTasks";
+
 
 
 
@@ -14,7 +14,7 @@ class Attendance extends Component {
     attendedMeetingsCount: null,
     unattendedMeetingsCount: null,
     completionPercentage: null,
-    timeRange: 'all_time',
+    timeRange: 'all_time',  // set to all_time on
     chartKey: Date.now(),
   };
 
@@ -25,17 +25,18 @@ class Attendance extends Component {
   componentDidUpdate(prevProps, prevState) {
     // Check if the time range has changed
     if (prevState.timeRange !== this.state.timeRange) {
-      //console.log("Time range changed. Fetching data...");
       this.fetchData();
     }
   }
 
   fetchData = async () => {
+    // Fetches attendance data
     try {
       this.setState({ loading: true });
       const { timeRange } = this.state;
       await this.props.fetchAttendedMeetingsCount(timeRange);
       await this.props.fetchUnattendedMeetingsCount(timeRange);
+
       // Calculate completion percentage
       const { attendedMeetingsCount, unattendedMeetingsCount } = this.props;
       const totalMeetingsCount = attendedMeetingsCount + unattendedMeetingsCount;
@@ -49,6 +50,7 @@ class Attendance extends Component {
   };
 
   handleTimeRangeChange = (event) => {
+    // Initiates a fetch for data if the time range changes
     const timeRange = event.target.value;
     this.setState({ timeRange }, () => {
       this.fetchData();
@@ -65,12 +67,16 @@ class Attendance extends Component {
         return <div>Loading...</div>;
       }
 
+  // Meeting data
   const meetingSummary = [
     {task: "Meetings Attended", value: attendedMeetingsCount || 0},
     {task: "Meetings Missed", value: unattendedMeetingsCount || 0},
   ]
+  
+  // Colors for pie chart
   const COLORS = ['#0088FE', '#FF8042'];
 
+  // Calculations for Pie Chart setup
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -84,7 +90,7 @@ class Attendance extends Component {
   );
 
 };
-
+  // Catches case where there are no meetings on the calendar
   if (attendedMeetingsCount + unattendedMeetingsCount == 0 && timeRange == "all_time") {
     return (
       <div>
@@ -100,6 +106,7 @@ class Attendance extends Component {
       </div>
     );
   } else {
+    // If meetings are on the calendar then the pie chart displays
     return (
       <div>
                   <h1 style={{ textAlign: 'center' }} className='mb-4'>Attendance Statistics</h1>
@@ -151,8 +158,6 @@ class Attendance extends Component {
     </ResponsiveContainer>
         <br/>
         <br/>
-        {/* !!!!Make values Dynamic!!!! */}
-        {/* <u1 style={{ textAlign: 'center' }} className='mb-4'> */}
             <p style={{ textAlign: 'center' }} className='mb-4'><b>Meetings Attended: </b>{attendedMeetingsCount}</p>
             <p style={{ textAlign: 'center' }} className='mb-4'><b>Meetings Missed: </b>{unattendedMeetingsCount}</p>
         <br/>

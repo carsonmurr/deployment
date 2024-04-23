@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-// import ReactDOM from 'react-dom/client';
 import {render} from "react-dom"
 import { HashRouter as Router, Route,Routes, Navigate } from 'react-router-dom';
 
