@@ -20,8 +20,7 @@ const Home = () => {
       </p>
       <h1 className="features-title">Our Features</h1>
       <div className="video-container">
-        <p>Here is our PoC Demo video, which is serving as a placeholder video for the Final Demo video. 
-          Here, we discuss the many features of our application and the main cause/reasons for its creation. </p>
+        <p>Here is our Final Demo video where we discuss the many features of our application and the main cause/reasons for its creation. </p>
         <iframe
           width="900"
           height="600"
