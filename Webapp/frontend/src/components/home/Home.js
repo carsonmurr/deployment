@@ -25,8 +25,8 @@ const Home = () => {
         <iframe
           width="900"
           height="600"
-          src="https://www.youtube.com/embed/HL1gRB1X7BI"
-          title="POC Demo"
+          src="https://www.youtube.com/embed/SXS3WOiHRfk"
+          title="Final Demo"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         ></iframe>
